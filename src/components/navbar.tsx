@@ -29,10 +29,10 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-9 h-9 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-xl flex items-center justify-center shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform">
+            <div className="w-9 h-9 bg-gradient-to-br from-[#8A0B34] via-[#A71042] to-[#F99B00] rounded-xl flex items-center justify-center shadow-md shadow-[#8A0B34]/30 group-hover:scale-105 transition-transform border border-[#F99B00]/20">
               <GraduationCap className="w-5 h-5 text-white" />
             </div>
-            <span className="text-lg font-bold bg-gradient-to-r from-white via-slate-200 to-indigo-300 bg-clip-text text-transparent">
+            <span className="text-lg font-bold bg-gradient-to-r from-white via-[#FFF2A8] to-[#B9DCFB] bg-clip-text text-transparent">
               PlacePrep AI
             </span>
           </Link>
@@ -53,7 +53,7 @@ export default function Navbar() {
                 </Link>
                 <Link
                   href="/signup"
-                  className="px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl shadow-md shadow-indigo-600/30 transition-all hover:scale-105"
+                  className="px-4 py-2 text-xs font-bold text-white bg-[#8A0B34] hover:bg-[#A71042] border border-[#A71042]/60 rounded-xl shadow-md shadow-[#8A0B34]/30 transition-all hover:scale-105"
                 >
                   Get Started Free
                 </Link>
@@ -64,9 +64,9 @@ export default function Navbar() {
               <>
                 <Link
                   href="/dashboard"
-                  className="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-slate-900 border border-slate-800 rounded-xl transition-colors"
+                  className="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-slate-900/90 border border-slate-800 hover:border-[#B9DCFB]/40 rounded-xl transition-colors"
                 >
-                  <LayoutDashboard className="w-3.5 h-3.5 text-indigo-400" />
+                  <LayoutDashboard className="w-3.5 h-3.5 text-[#B9DCFB]" />
                   Dashboard
                 </Link>
 
