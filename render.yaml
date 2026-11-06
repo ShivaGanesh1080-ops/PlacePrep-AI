@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: placeprep-ai
+    env: node
+    plan: free
+    buildCommand: npm install && npx prisma db push && node prisma/seed.js && npm run build
+    startCommand: npm run start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXTAUTH_URL
+        sync: false
+      - key: NEXTAUTH_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        value: file:./dev.db
+      - key: CLOUDFLARE_ACCOUNT_ID
+        sync: false
+      - key: CLOUDFLARE_API_TOKEN
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false

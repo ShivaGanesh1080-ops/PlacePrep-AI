@@ -1,0 +1,125 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String              @id @default(cuid())
+  name           String
+  email          String              @unique
+  password       String
+  role           String              @default("STUDENT") // STUDENT | ADMIN
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  profile        StudentProfile?
+  recommendations CareerRecommendation[]
+  testAttempts   TestAttempt[]
+  mockInterviews MockInterview[]
+  resumeAnalyses ResumeAnalysis[]
+  applications   CompanyApplication[]
+}
+
+model StudentProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cgpa        Float?
+  branch      String?
+  year        Int?
+  skills      String?  // JSON array stored as string
+  interests   String?  // JSON array stored as string
+  strengths   String?  // JSON array stored as string
+  resumeText  String?
+  linkedinUrl String?
+  githubUrl   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model CareerRecommendation {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  careers   String   // JSON string with career recommendations
+  analysis  String   // Full AI analysis text
+  createdAt DateTime @default(now())
+}
+
+model Question {
+  id          String   @id @default(cuid())
+  category    String   // QUANTITATIVE | VERBAL | LOGICAL | TECHNICAL
+  difficulty  String   @default("MEDIUM") // EASY | MEDIUM | HARD
+  text        String
+  optionA     String
+  optionB     String
+  optionC     String
+  optionD     String
+  answer      String   // A | B | C | D
+  explanation String?
+  createdAt   DateTime @default(now())
+}
+
+model TestAttempt {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category  String
+  score     Int
+  total     Int
+  timeTaken Int      // seconds
+  answers   String   // JSON string of user answers
+  createdAt DateTime @default(now())
+}
+
+model MockInterview {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type       String   // HR | TECHNICAL | BEHAVIORAL
+  transcript String   // JSON string of conversation
+  feedback   String?  // AI feedback
+  score      Int?
+  createdAt  DateTime @default(now())
+}
+
+model ResumeAnalysis {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resumeText String
+  score      Int
+  feedback   String   // JSON string with detailed feedback
+  createdAt  DateTime @default(now())
+}
+
+model Company {
+  id           String              @id @default(cuid())
+  name         String
+  role         String
+  package      String              // e.g., "12 LPA"
+  cgpaCutoff   Float
+  description  String?
+  eligibility  String?             // Additional eligibility criteria
+  visitDate    DateTime?
+  status       String              @default("UPCOMING") // UPCOMING | ONGOING | COMPLETED
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  applications CompanyApplication[]
+}
+
+model CompanyApplication {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  status    String   @default("INTERESTED") // INTERESTED | APPLIED | SHORTLISTED | SELECTED | REJECTED
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, companyId])
+}
