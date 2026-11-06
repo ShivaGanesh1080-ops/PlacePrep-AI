@@ -24,15 +24,15 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm">
+    <nav className="sticky top-0 z-50 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/80 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-9 h-9 bg-gradient-to-br from-indigo-600 to-blue-500 rounded-lg flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <div className="w-9 h-9 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-xl flex items-center justify-center shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform">
               <GraduationCap className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">
+            <span className="text-lg font-bold bg-gradient-to-r from-white via-slate-200 to-indigo-300 bg-clip-text text-transparent">
               PlacePrep AI
             </span>
           </Link>
@@ -40,22 +40,22 @@ export default function Navbar() {
           {/* Right side */}
           <div className="flex items-center gap-3">
             {status === "loading" && (
-              <div className="w-8 h-8 rounded-full bg-slate-200 animate-pulse" />
+              <div className="w-8 h-8 rounded-full bg-slate-800 animate-pulse" />
             )}
 
             {status === "unauthenticated" && (
               <>
                 <Link
                   href="/login"
-                  className="px-4 py-2 text-sm font-medium text-slate-700 hover:text-indigo-600 transition-colors"
+                  className="px-4 py-2 text-xs font-semibold text-slate-300 hover:text-white transition-colors"
                 >
-                  Login
+                  Log in
                 </Link>
                 <Link
                   href="/signup"
-                  className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-indigo-600 to-blue-600 rounded-lg hover:from-indigo-700 hover:to-blue-700 shadow-md hover:shadow-lg transition-all"
+                  className="px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl shadow-md shadow-indigo-600/30 transition-all hover:scale-105"
                 >
-                  Sign Up
+                  Get Started Free
                 </Link>
               </>
             )}
@@ -64,9 +64,9 @@ export default function Navbar() {
               <>
                 <Link
                   href="/dashboard"
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 hover:text-indigo-600 transition-colors"
+                  className="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-slate-900 border border-slate-800 rounded-xl transition-colors"
                 >
-                  <LayoutDashboard className="w-4 h-4" />
+                  <LayoutDashboard className="w-3.5 h-3.5 text-indigo-400" />
                   Dashboard
                 </Link>
 
@@ -74,35 +74,43 @@ export default function Navbar() {
                 <div className="relative" ref={dropdownRef}>
                   <button
                     onClick={() => setDropdownOpen(!dropdownOpen)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-100 transition-colors"
+                    className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl hover:bg-slate-900 border border-transparent hover:border-slate-800 transition-colors cursor-pointer"
                   >
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-blue-500 flex items-center justify-center text-white text-sm font-semibold">
+                    <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-blue-500 flex items-center justify-center text-white text-xs font-bold">
                       {session.user.name
                         ? session.user.name.charAt(0).toUpperCase()
                         : "U"}
                     </div>
-                    <span className="text-sm font-medium text-slate-700 hidden sm:block">
+                    <span className="text-xs font-medium text-slate-200 hidden sm:block">
                       {session.user.name || "User"}
                     </span>
-                    <ChevronDown className="w-4 h-4 text-slate-400" />
+                    <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
                   </button>
 
                   {dropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-200 py-1 animate-in fade-in slide-in-from-top-2">
-                      <div className="px-4 py-2 border-b border-slate-100">
-                        <p className="text-sm font-medium text-slate-900">
+                    <div className="absolute right-0 mt-2 w-52 bg-slate-900 rounded-2xl shadow-2xl border border-slate-800 py-1.5 animate-in fade-in slide-in-from-top-2 z-50">
+                      <div className="px-4 py-2 border-b border-slate-800">
+                        <p className="text-xs font-bold text-slate-100">
                           {session.user.name}
                         </p>
-                        <p className="text-xs text-slate-500 truncate">
+                        <p className="text-[11px] text-slate-400 truncate">
                           {session.user.email}
                         </p>
                       </div>
+                      <Link
+                        href="/dashboard"
+                        onClick={() => setDropdownOpen(false)}
+                        className="flex items-center gap-2 px-4 py-2 text-xs text-slate-300 hover:text-white hover:bg-slate-800/80 transition"
+                      >
+                        <LayoutDashboard className="w-3.5 h-3.5 text-indigo-400" />
+                        Student Portal
+                      </Link>
                       <button
                         onClick={() => signOut({ callbackUrl: "/" })}
-                        className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                        className="w-full flex items-center gap-2 px-4 py-2 text-xs text-red-400 hover:text-red-300 hover:bg-red-950/40 transition cursor-pointer"
                       >
-                        <LogOut className="w-4 h-4" />
-                        Logout
+                        <LogOut className="w-3.5 h-3.5" />
+                        Log out
                       </button>
                     </div>
                   )}
