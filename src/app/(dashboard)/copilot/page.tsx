@@ -10,7 +10,6 @@ import {
   User,
   Copy,
   Check,
-  RotateCcw,
   Paperclip,
   Image as ImageIcon,
   X,
@@ -275,10 +274,8 @@ export default function CopilotPage() {
           { role: "assistant", content: data.response },
         ]);
 
-        // If this was a new conversation, update currentConversationId and reload history
         if (data.conversationId && data.conversationId !== currentConversationId) {
           setCurrentConversationId(data.conversationId);
-          // Refresh conversation list to get auto-generated title
           const listRes = await fetch("/api/copilot/conversations");
           if (listRes.ok) {
             const listData = await listRes.json();
@@ -364,7 +361,7 @@ export default function CopilotPage() {
   const activeConversation = conversations.find((c) => c.id === currentConversationId);
 
   return (
-    <div className="max-w-7xl mx-auto h-[calc(100vh-6.5rem)] flex gap-4 pb-2">
+    <div className="w-full h-[calc(100vh-7.5rem)] flex rounded-2xl border border-slate-200/90 bg-white shadow-sm overflow-hidden">
       {/* Full-size Image Zoom Modal */}
       {expandedImage && (
         <div
@@ -388,17 +385,17 @@ export default function CopilotPage() {
         </div>
       )}
 
-      {/* ChatGPT-Style Sidebar: Chat History */}
+      {/* Unified ChatGPT-Style Sidebar: Chat History */}
       <aside
-        className={`transition-all duration-300 flex flex-col bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden ${
-          isSidebarOpen ? "w-72 sm:w-80 shrink-0" : "w-0 p-0 border-0 overflow-hidden"
+        className={`transition-all duration-300 flex flex-col bg-slate-50/70 border-r border-slate-200/80 overflow-hidden shrink-0 ${
+          isSidebarOpen ? "w-64 sm:w-72" : "w-0 border-r-0"
         }`}
       >
         {/* Sidebar Header: New Chat Button */}
-        <div className="p-3.5 border-b border-slate-100 space-y-3">
+        <div className="p-3 border-b border-slate-200/70 space-y-2.5 bg-white/60">
           <button
             onClick={handleNewChat}
-            className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-100 hover:shadow-indigo-200 transition-all cursor-pointer group"
+            className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-xs hover:shadow-sm transition-all cursor-pointer group"
           >
             <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform" />
             <span>New Chat</span>
@@ -406,13 +403,13 @@ export default function CopilotPage() {
 
           {/* Search Box */}
           <div className="relative">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Search chat history..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              className="w-full pl-7 pr-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500"
             />
           </div>
         </div>
@@ -429,7 +426,7 @@ export default function CopilotPage() {
               <MessageSquare className="w-8 h-8 text-slate-300 mx-auto mb-2" />
               <p className="font-semibold text-slate-600">No chat history yet</p>
               <p className="text-[11px] mt-1 text-slate-400">
-                Start asking doubts and your conversations will be saved here automatically!
+                Start asking doubts and your conversations will appear here automatically!
               </p>
             </div>
           ) : (
@@ -443,21 +440,21 @@ export default function CopilotPage() {
                   onClick={() => !isEditing && loadConversationMessages(conv.id)}
                   className={`group relative flex items-center justify-between p-2.5 rounded-xl text-xs cursor-pointer transition-all ${
                     isActive
-                      ? "bg-indigo-50 text-indigo-900 font-semibold border border-indigo-200 shadow-xs"
-                      : "text-slate-700 hover:bg-slate-50 border border-transparent"
+                      ? "bg-white text-indigo-700 font-semibold border border-indigo-200/90 shadow-xs"
+                      : "text-slate-700 hover:bg-slate-100/70 border border-transparent"
                   }`}
                 >
                   {isEditing ? (
                     <form
                       onSubmit={(e) => handleSaveTitle(conv.id, e)}
-                      className="flex-1 flex items-center gap-1.5"
+                      className="flex-1 flex items-center gap-1"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <input
                         type="text"
                         value={editTitle}
                         onChange={(e) => setEditTitle(e.target.value)}
-                        className="w-full px-2 py-1 text-xs border border-indigo-300 rounded bg-white text-slate-900 focus:outline-none"
+                        className="w-full px-2 py-0.5 text-xs border border-indigo-300 rounded bg-white text-slate-900 focus:outline-none"
                         autoFocus
                       />
                       <button
@@ -476,7 +473,7 @@ export default function CopilotPage() {
                     </form>
                   ) : (
                     <>
-                      <div className="flex items-center gap-2 overflow-hidden flex-1 mr-2">
+                      <div className="flex items-center gap-2 overflow-hidden flex-1 mr-1">
                         <MessageSquare
                           className={`w-3.5 h-3.5 shrink-0 ${
                             isActive ? "text-indigo-600" : "text-slate-400 group-hover:text-slate-600"
@@ -486,21 +483,21 @@ export default function CopilotPage() {
                       </div>
 
                       {/* Action buttons (Rename & Delete) on hover */}
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                      <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             setEditingId(conv.id);
                             setEditTitle(conv.title);
                           }}
-                          className="p-1 rounded text-slate-400 hover:text-indigo-600 hover:bg-white"
+                          className="p-1 rounded text-slate-400 hover:text-indigo-600 hover:bg-slate-200/60"
                           title="Rename thread"
                         >
                           <Edit2 className="w-3 h-3" />
                         </button>
                         <button
                           onClick={(e) => handleDeleteConversation(conv.id, e)}
-                          className="p-1 rounded text-slate-400 hover:text-red-600 hover:bg-white"
+                          className="p-1 rounded text-slate-400 hover:text-red-600 hover:bg-slate-200/60"
                           title="Delete thread"
                         >
                           <Trash2 className="w-3 h-3" />
@@ -516,27 +513,27 @@ export default function CopilotPage() {
 
         {/* Sidebar Footer: Clear History */}
         {conversations.length > 0 && (
-          <div className="p-3 border-t border-slate-100 bg-slate-50/50">
+          <div className="p-2.5 border-t border-slate-200/70 bg-white/40">
             <button
               onClick={handleClearAllHistory}
-              className="w-full flex items-center justify-center gap-1.5 py-1.5 text-[11px] text-slate-500 hover:text-red-600 transition-colors"
+              className="w-full flex items-center justify-center gap-1.5 py-1 text-[11px] text-slate-500 hover:text-red-600 transition-colors cursor-pointer"
             >
               <Trash2 className="w-3.5 h-3.5" />
-              <span>Clear All Chat History</span>
+              <span>Clear History</span>
             </button>
           </div>
         )}
       </aside>
 
       {/* Main Chat Workspace */}
-      <main className="flex-1 flex flex-col bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+      <main className="flex-1 flex flex-col bg-white overflow-hidden min-w-0">
         {/* Workspace Top Bar */}
-        <div className="flex items-center justify-between py-3 px-4 border-b border-slate-100 bg-white">
-          <div className="flex items-center gap-2.5">
+        <div className="flex items-center justify-between py-2.5 px-4 border-b border-slate-200/80 bg-white shrink-0">
+          <div className="flex items-center gap-2.5 min-w-0">
             {/* Toggle History Sidebar */}
             <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors"
+              className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors shrink-0 cursor-pointer"
               title={isSidebarOpen ? "Collapse chat history" : "Open chat history"}
             >
               {isSidebarOpen ? (
@@ -546,26 +543,26 @@ export default function CopilotPage() {
               )}
             </button>
 
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-600 to-blue-500 text-white flex items-center justify-center shadow-xs">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-indigo-600 to-blue-500 text-white flex items-center justify-center shadow-xs shrink-0">
               <Bot className="w-4 h-4" />
             </div>
 
-            <div>
+            <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <h2 className="text-xs sm:text-sm font-bold text-slate-900 truncate max-w-xs sm:max-w-md">
+                <h2 className="text-xs sm:text-sm font-bold text-slate-900 truncate">
                   {activeConversation ? activeConversation.title : "Prep AI Mentor"}
                 </h2>
-                <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Active Copilot
                 </span>
               </div>
-              <p className="text-[10px] text-slate-400 hidden sm:block">
-                Multimodal Placement Coach & Code Sandbox Executor
+              <p className="text-[10px] text-slate-400 hidden sm:block truncate">
+                Placement Doubt Solver & Code Executor
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={handleNewChat}
               className="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 border border-indigo-200 rounded-lg transition-colors cursor-pointer"
@@ -577,7 +574,7 @@ export default function CopilotPage() {
         </div>
 
         {/* Chat Messages Scroll Container */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
           {loadingMessages ? (
             <div className="h-full flex items-center justify-center gap-2 text-xs text-slate-400">
               <Loader2 className="w-5 h-5 animate-spin text-indigo-500" />
@@ -593,13 +590,13 @@ export default function CopilotPage() {
                   }`}
                 >
                   {msg.role === "assistant" && (
-                    <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-500 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
-                      <Bot className="w-4 h-4" />
+                    <div className="w-7 h-7 rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-500 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
+                      <Bot className="w-3.5 h-3.5" />
                     </div>
                   )}
 
                   <div
-                    className={`relative group max-w-[85%] sm:max-w-[78%] rounded-2xl px-4 py-3 shadow-xs ${
+                    className={`relative group max-w-[88%] sm:max-w-[82%] rounded-2xl px-4 py-3 shadow-xs ${
                       msg.role === "user"
                         ? "bg-indigo-600 text-white rounded-tr-xs"
                         : "bg-slate-50 text-slate-800 border border-slate-200/80 rounded-tl-xs"
@@ -653,8 +650,8 @@ export default function CopilotPage() {
                   </div>
 
                   {msg.role === "user" && (
-                    <div className="w-8 h-8 rounded-xl bg-slate-800 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
-                      <User className="w-4 h-4" />
+                    <div className="w-7 h-7 rounded-xl bg-slate-800 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
+                      <User className="w-3.5 h-3.5" />
                     </div>
                   )}
                 </div>
@@ -663,8 +660,8 @@ export default function CopilotPage() {
               {/* Dynamic Thinking Bubble */}
               {loading && (
                 <div className="flex gap-3 justify-start animate-in fade-in duration-200">
-                  <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-500 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
-                    <Bot className="w-4 h-4" />
+                  <div className="w-7 h-7 rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-500 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
+                    <Bot className="w-3.5 h-3.5" />
                   </div>
                   <div className="bg-slate-50 border border-slate-200/80 rounded-2xl rounded-tl-xs px-4 py-3 shadow-xs flex items-center gap-3 text-xs text-slate-600">
                     <span className="relative flex h-2.5 w-2.5">
@@ -685,7 +682,7 @@ export default function CopilotPage() {
 
         {/* Suggested Doubts Chips (Only visible in brand new chat with initial message) */}
         {messages.length === 1 && !loading && (
-          <div className="px-4 py-2 bg-slate-50/70 border-t border-slate-100">
+          <div className="px-4 py-2 bg-slate-50/70 border-t border-slate-100 shrink-0">
             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
               <span>⚡</span> Suggested Placement Doubts
             </p>
@@ -705,7 +702,7 @@ export default function CopilotPage() {
 
         {/* Image Attachment Preview Ribbon */}
         {attachedImage && (
-          <div className="px-4 py-2 bg-indigo-50/60 border-t border-indigo-100 flex items-center justify-between">
+          <div className="px-4 py-2 bg-indigo-50/60 border-t border-indigo-100 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-2">
               <div className="relative w-10 h-10 rounded-lg overflow-hidden border border-indigo-200 shadow-xs">
                 <img src={attachedImage} alt="Attachment thumbnail" className="w-full h-full object-cover" />
@@ -725,8 +722,8 @@ export default function CopilotPage() {
           </div>
         )}
 
-        {/* Input Bar */}
-        <div className="p-3 border-t border-slate-100 bg-white">
+        {/* Sticky Input Bar */}
+        <div className="p-3 border-t border-slate-200/80 bg-white shrink-0">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -747,7 +744,7 @@ export default function CopilotPage() {
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className={`p-2.5 rounded-xl border transition-colors cursor-pointer ${
+              className={`p-2.5 rounded-xl border transition-colors cursor-pointer shrink-0 ${
                 attachedImage
                   ? "bg-indigo-100 text-indigo-700 border-indigo-300"
                   : "bg-slate-50 text-slate-500 hover:text-slate-800 border-slate-200 hover:bg-slate-100"
@@ -771,7 +768,7 @@ export default function CopilotPage() {
             <button
               type="submit"
               disabled={loading || (!input.trim() && !attachedImage)}
-              className="p-2.5 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed shadow-md shadow-indigo-100 transition-all cursor-pointer"
+              className="p-2.5 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm transition-all cursor-pointer shrink-0"
             >
               <Send className="w-4 h-4" />
             </button>
