@@ -1,86 +1,91 @@
-# Deploying PlacePrep AI to Render & UptimeRobot
+# Deploying PlacePrep AI to Render & UptimeRobot (Zero-Downtime Guide)
 
-## Part 1: Can You Use Ollama Online?
-
-**The Honest Technical Answer:**
-- **Inside Render Free Tier? NO.** Render's free tier gives only **512 MB of RAM**. Loading even a small 2-billion parameter model like `gemma2:2b` requires at least **2.5 GB to 4 GB of RAM**, which will cause an instant Out-Of-Memory (OOM) crash on Render.
-- **Can you connect Render to Ollama online? YES, in 2 ways:**
-  
-### Option A: Tunnel Your Local Ollama Online (100% Free)
-You can expose your laptop's running Ollama instance to the internet using **Cloudflare Tunnel** or **Ngrok**:
-```bash
-# Using Cloudflare Tunnel (no account required):
-npx cloudflared tunnel --url http://localhost:11434
-
-# OR using Ngrok:
-ngrok http 11434
-```
-It gives you a public HTTPS URL like `https://funny-random-subdomain.trycloudflare.com`.
-In Render's Environment Variables, set:
-```env
-OLLAMA_HOST=https://funny-random-subdomain.trycloudflare.com
-```
-Now Render forwards all AI requests directly to your laptop's Ollama instance!
-
-### Option B: Use Groq API for Blazing Fast (0.2s) Responses (Recommended for Cloud)
-Ollama running on CPU locally causes a 5–15 second latency delay. In `src/lib/gemini.ts`, we added native support for **Groq**:
-1. Get a free API key at [console.groq.com](https://console.groq.com) (no credit card required).
-2. Set `GROQ_API_KEY="gsk_..."` in `.env` or Render environment variables.
-3. Groq runs LPU hardware delivering **500+ tokens/sec (sub-second responses)** with zero local CPU load!
+This guide walks you through deploying **PlacePrep AI** to [Render](https://render.com) for free, along with keeping it awake 24/7 using **UptimeRobot**.
 
 ---
 
-## Part 2: Deploying to Render.com
+## 1. Repository Information
+- **GitHub Repository:** [`https://github.com/ShivaGanesh1080-ops/PlacePrep-AI`](https://github.com/ShivaGanesh1080-ops/PlacePrep-AI)
+- **Branch:** `main`
 
-### Step 1: Push Project to GitHub
-```bash
-git init
-git add .
-git commit -m "Initial PlacePrep AI release"
-git branch -M main
-git remote add origin https://github.com/ShivaGanesh1080-ops/placement-portal.git
-git push -u origin main
-```
+---
 
-### Step 2: Create a Web Service on Render
-1. Go to [dashboard.render.com](https://dashboard.render.com) and click **New +** → **Web Service**.
-2. Connect your GitHub repository.
-3. Configure the build & start settings:
-   - **Name:** `placeprep-ai`
-   - **Environment:** `Node`
-   - **Region:** Singapore / Oregon / Frankfurt
+## 2. Deploying on Render (Two Options)
+
+### Option A: Using Render Blueprints (`render.yaml` — 1-Click Automated)
+The repository contains a pre-configured `render.yaml` file.
+1. Log in to [dashboard.render.com](https://dashboard.render.com).
+2. Click **New +** → **Blueprint**.
+3. Select your GitHub repository: `ShivaGanesh1080-ops/PlacePrep-AI`.
+4. Render will parse `render.yaml` and configure the Web Service automatically.
+5. In the Environment Variables screen, fill in:
+   - `NEXTAUTH_URL`: `https://<your-service-name>.onrender.com`
+   - `CLOUDFLARE_ACCOUNT_ID`: *(From your Cloudflare Dashboard)*
+   - `CLOUDFLARE_API_TOKEN`: *(From your Cloudflare Dashboard)*
+6. Click **Apply**.
+
+---
+
+### Option B: Manual Web Service Setup (Step-by-Step)
+If you prefer setting it up manually:
+1. Go to [dashboard.render.com](https://dashboard.render.com) → click **New +** → **Web Service**.
+2. Select **Build and deploy from a Git repository** and connect `ShivaGanesh1080-ops/PlacePrep-AI`.
+3. Configure the settings:
+   - **Name:** `placeprep-ai` *(or your preferred URL prefix)*
+   - **Region:** `Singapore` *(fastest for India)* or `Oregon (US West)`
    - **Branch:** `main`
+   - **Runtime:** `Node`
    - **Build Command:**
      ```bash
-     npm install --legacy-peer-deps && npx prisma db push && node prisma/seed.ts && npm run build
+     npm install && npx prisma db push && node prisma/seed.js && npm run build
      ```
    - **Start Command:**
      ```bash
      npm run start
      ```
-   - **Plan:** Free
+   - **Instance Type:** `Free` (512 MB RAM / 0.1 CPU)
 
-### Step 3: Set Environment Variables in Render
-Under **Environment Variables**, add:
-- `NEXTAUTH_SECRET`: Any random 32-character string (e.g. `c84a8b79e13d9f2e718290f6b7c89a0d`)
-- `NEXTAUTH_URL`: Your Render URL (e.g. `https://placeprep-ai.onrender.com`)
-- `DATABASE_URL`: `file:./dev.db` *(or a free PostgreSQL connection string from Supabase/Neon)*
-- `GROQ_API_KEY`: *(Optional, for sub-second responses)*
-- `OLLAMA_HOST`: Your Cloudflare Tunnel URL or `http://127.0.0.1:11434`
+4. **Environment Variables:**
+   Under **Environment Variables**, add the following keys:
+   | Key | Value / Note |
+   | :--- | :--- |
+   | `NODE_ENV` | `production` |
+   | `DATABASE_URL` | `file:./dev.db` |
+   | `NEXTAUTH_SECRET` | Click **Generate** or enter a 32+ character string |
+   | `NEXTAUTH_URL` | `https://placeprep-ai.onrender.com` *(match your Render URL)* |
+   | `CLOUDFLARE_ACCOUNT_ID` | Your Cloudflare Account ID |
+   | `CLOUDFLARE_API_TOKEN` | Your Cloudflare Workers AI API Token |
+   | `GEMINI_API_KEY` | *(Optional fallback)* |
+
+5. Click **Create Web Service**.
 
 ---
 
-## Part 3: Keeping Render Awake with UptimeRobot (Prevent 15-Min Sleep)
+## 3. Post-Deployment Verification
+Once Render finishes deploying:
+1. Visit `https://<your-app-name>.onrender.com`.
+2. Test signing up a new account or logging in with student credentials:
+   - **Email:** `shiva@student.com` | **Password:** `student123`
+   - **Admin:** `admin@placeprep.ai` | **Password:** `admin123`
+3. Verify that `/api/health` returns:
+   ```json
+   {"status":"ok","timestamp":"2026-..."}
+   ```
 
-Render's free tier spins down to sleep if there are no incoming requests for 15 minutes. Cold starts take ~50 seconds. To prevent this:
+---
 
-1. Sign up for free at **[UptimeRobot.com](https://uptimerobot.com)**.
+## 4. Preventing Cold Boots (24/7 Free Uptime with UptimeRobot)
+
+Render's free tier spins down (sleeps) if there are no incoming requests for 15 minutes. The next visitor experiences a 50-second cold boot delay.
+
+To keep it **awake 24/7 without paying anything**:
+1. Sign up for a free account at [UptimeRobot.com](https://uptimerobot.com).
 2. Click **+ Add New Monitor**.
-3. Configure the monitor:
+3. Fill in the details:
    - **Monitor Type:** `HTTP(s)`
    - **Friendly Name:** `PlacePrep AI Keepalive`
-   - **URL (or IP):** `https://your-app-name.onrender.com/api/health`
-   - **Monitoring Interval:** Every `5 minutes` (or `10 minutes`)
+   - **URL (or IP):** `https://<your-service-name>.onrender.com/api/health`
+   - **Monitoring Interval:** Every `5 minutes`
 4. Click **Create Monitor**.
 
-UptimeRobot will ping `/api/health` every 5 minutes. Because the interval is less than Render's 15-minute inactivity threshold, **your Render instance will stay awake 24/7 with zero cold starts**!
+Because UptimeRobot pings `/api/health` every 5 minutes (well below the 15-minute inactivity limit), **Render will never spin down and your app will load instantly for students and recruiters!**
