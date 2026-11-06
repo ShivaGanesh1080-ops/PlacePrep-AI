@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { chatWithOllama, generateAIResponse } from "@/lib/gemini";
 
 export const dynamic = "force-dynamic";
@@ -15,6 +16,14 @@ Tone and Behavior Guidelines (like ChatGPT):
 4. If the user attaches an image or asks about an image, analyze the contents of the image directly and explain what it depicts clearly.
 5. Format your answers with clean Markdown headings, bullet points, and bold text.`;
 
+function generateTitleFromPrompt(prompt: string): string {
+  const clean = prompt.replace(/[#*`_]/g, "").trim();
+  if (!clean) return "Technical Query";
+  const firstSentence = clean.split("\n")[0].split(/[.?!]/)[0];
+  if (firstSentence.length <= 42) return firstSentence.trim();
+  return firstSentence.slice(0, 39).trim() + "...";
+}
+
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -22,30 +31,91 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { messages } = await req.json();
+    const { messages, conversationId } = await req.json();
 
     if (!Array.isArray(messages) || messages.length === 0) {
       return NextResponse.json({ error: "Messages array required" }, { status: 400 });
     }
 
-    // Try multi-turn chat with Ollama first
+    // 1. Locate or create conversation
+    let conversation = null;
+    if (conversationId) {
+      conversation = await prisma.chatConversation.findFirst({
+        where: { id: conversationId, userId: session.user.id },
+      });
+    }
+
+    if (!conversation) {
+      conversation = await prisma.chatConversation.create({
+        data: {
+          userId: session.user.id,
+          title: "New Chat",
+        },
+      });
+    }
+
+    // 2. Identify the last user message
+    const lastUserMessage = messages[messages.length - 1];
+    const userContent = lastUserMessage?.content || "";
+    const userImage = lastUserMessage?.image || null;
+
+    // Save user message to database
+    await prisma.chatMessage.create({
+      data: {
+        conversationId: conversation.id,
+        role: "user",
+        content: userContent,
+        imageUrl: userImage ? userImage.slice(0, 200) : null, // Store reference/indicator if attached
+      },
+    });
+
+    // Update title if it's currently "New Chat"
+    if (conversation.title === "New Chat" && userContent) {
+      const generatedTitle = generateTitleFromPrompt(userContent);
+      await prisma.chatConversation.update({
+        where: { id: conversation.id },
+        data: { title: generatedTitle },
+      });
+    }
+
+    // 3. Generate AI Response
+    let aiResponse = "";
+
+    // Try multi-turn chat with Cloudflare / Ollama first
     const chatResponse = await chatWithOllama(messages, SYSTEM_PROMPT);
 
     if (chatResponse) {
-      return NextResponse.json({ response: chatResponse });
+      aiResponse = chatResponse;
+    } else {
+      // Fallback single-turn generate
+      const conversationHistory = messages
+        .slice(-6)
+        .map((m: { role: string; content: string }) => `${m.role === "user" ? "Student" : "Copilot"}: ${m.content}`)
+        .join("\n");
+
+      const fallbackPrompt = `${conversationHistory}\nStudent: ${userContent}\nCopilot:`;
+      aiResponse = await generateAIResponse(fallbackPrompt, SYSTEM_PROMPT);
     }
 
-    // If chat failed, format prompt for single-turn generate
-    const lastUserMessage = messages[messages.length - 1]?.content || "";
-    const conversationHistory = messages
-      .slice(-6)
-      .map((m: { role: string; content: string }) => `${m.role === "user" ? "Student" : "Copilot"}: ${m.content}`)
-      .join("\n");
+    // 4. Save AI Response to database
+    await prisma.chatMessage.create({
+      data: {
+        conversationId: conversation.id,
+        role: "assistant",
+        content: aiResponse,
+      },
+    });
 
-    const fallbackPrompt = `${conversationHistory}\nStudent: ${lastUserMessage}\nCopilot:`;
-    const genResponse = await generateAIResponse(fallbackPrompt, SYSTEM_PROMPT);
+    // Touch conversation updatedAt
+    await prisma.chatConversation.update({
+      where: { id: conversation.id },
+      data: { updatedAt: new Date() },
+    });
 
-    return NextResponse.json({ response: genResponse });
+    return NextResponse.json({
+      response: aiResponse,
+      conversationId: conversation.id,
+    });
   } catch (error) {
     console.error("Copilot chat error:", error);
     return NextResponse.json(
