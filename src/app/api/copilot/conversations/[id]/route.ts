@@ -5,14 +5,35 @@ import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
+async function getAuthenticatedDbUser() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) return null;
+
+  if (session.user.id) {
+    const userById = await prisma.user.findUnique({
+      where: { id: session.user.id },
+    });
+    if (userById) return userById;
+  }
+
+  if (session.user.email) {
+    const userByEmail = await prisma.user.findUnique({
+      where: { email: session.user.email.toLowerCase().trim() },
+    });
+    if (userByEmail) return userByEmail;
+  }
+
+  return null;
+}
+
 // GET /api/copilot/conversations/[id] - Get messages for a specific conversation
 export async function GET(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    const dbUser = await getAuthenticatedDbUser();
+    if (!dbUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -21,7 +42,7 @@ export async function GET(
     const conversation = await prisma.chatConversation.findFirst({
       where: {
         id,
-        userId: session.user.id,
+        userId: dbUser.id,
       },
       include: {
         messages: {
@@ -53,8 +74,8 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    const dbUser = await getAuthenticatedDbUser();
+    if (!dbUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -72,7 +93,7 @@ export async function PATCH(
     const updated = await prisma.chatConversation.updateMany({
       where: {
         id,
-        userId: session.user.id,
+        userId: dbUser.id,
       },
       data: {
         title: title.slice(0, 60).trim(),
@@ -95,8 +116,8 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    const dbUser = await getAuthenticatedDbUser();
+    if (!dbUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -105,7 +126,7 @@ export async function DELETE(
     await prisma.chatConversation.deleteMany({
       where: {
         id,
-        userId: session.user.id,
+        userId: dbUser.id,
       },
     });
 

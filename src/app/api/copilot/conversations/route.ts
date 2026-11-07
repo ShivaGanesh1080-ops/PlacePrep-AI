@@ -5,16 +5,37 @@ import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
+async function getAuthenticatedDbUser() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) return null;
+
+  if (session.user.id) {
+    const userById = await prisma.user.findUnique({
+      where: { id: session.user.id },
+    });
+    if (userById) return userById;
+  }
+
+  if (session.user.email) {
+    const userByEmail = await prisma.user.findUnique({
+      where: { email: session.user.email.toLowerCase().trim() },
+    });
+    if (userByEmail) return userByEmail;
+  }
+
+  return null;
+}
+
 // GET /api/copilot/conversations - List all chat conversations for logged-in user
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const dbUser = await getAuthenticatedDbUser();
+    if (!dbUser) {
+      return NextResponse.json({ conversations: [] });
     }
 
     const conversations = await prisma.chatConversation.findMany({
-      where: { userId: session.user.id },
+      where: { userId: dbUser.id },
       orderBy: { updatedAt: "desc" },
       include: {
         _count: {
@@ -27,8 +48,8 @@ export async function GET() {
   } catch (error) {
     console.error("Error fetching conversations:", error);
     return NextResponse.json(
-      { error: "Failed to fetch conversations" },
-      { status: 500 }
+      { error: "Failed to fetch conversations", conversations: [] },
+      { status: 200 } // Return empty list rather than 500 error to keep UI functional
     );
   }
 }
@@ -36,8 +57,8 @@ export async function GET() {
 // POST /api/copilot/conversations - Create a new empty conversation thread
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    const dbUser = await getAuthenticatedDbUser();
+    if (!dbUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -53,7 +74,7 @@ export async function POST(req: Request) {
 
     const conversation = await prisma.chatConversation.create({
       data: {
-        userId: session.user.id,
+        userId: dbUser.id,
         title,
       },
     });
@@ -71,13 +92,13 @@ export async function POST(req: Request) {
 // DELETE /api/copilot/conversations - Clear all conversations for the user
 export async function DELETE() {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    const dbUser = await getAuthenticatedDbUser();
+    if (!dbUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     await prisma.chatConversation.deleteMany({
-      where: { userId: session.user.id },
+      where: { userId: dbUser.id },
     });
 
     return NextResponse.json({ success: true });

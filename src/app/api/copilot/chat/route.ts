@@ -18,109 +18,148 @@ Tone and Behavior Guidelines (like ChatGPT):
 
 function generateTitleFromPrompt(prompt: string): string {
   const clean = prompt.replace(/[#*`_]/g, "").trim();
-  if (!clean) return "Technical Query";
+  if (!clean) return "Placement Doubt";
   const firstSentence = clean.split("\n")[0].split(/[.?!]/)[0];
-  if (firstSentence.length <= 42) return firstSentence.trim();
-  return firstSentence.slice(0, 39).trim() + "...";
+  if (firstSentence.length <= 40) return firstSentence.trim();
+  return firstSentence.slice(0, 37).trim() + "...";
+}
+
+async function getAuthenticatedDbUser() {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) return null;
+
+    if (session.user.id) {
+      const userById = await prisma.user.findUnique({
+        where: { id: session.user.id },
+      });
+      if (userById) return userById;
+    }
+
+    if (session.user.email) {
+      const userByEmail = await prisma.user.findUnique({
+        where: { email: session.user.email.toLowerCase().trim() },
+      });
+      if (userByEmail) return userByEmail;
+    }
+  } catch (err) {
+    console.warn("User lookup error:", err);
+  }
+  return null;
 }
 
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const { messages, conversationId } = await req.json();
 
     if (!Array.isArray(messages) || messages.length === 0) {
       return NextResponse.json({ error: "Messages array required" }, { status: 400 });
     }
 
-    // 1. Locate or create conversation
-    let conversation = null;
-    if (conversationId) {
-      conversation = await prisma.chatConversation.findFirst({
-        where: { id: conversationId, userId: session.user.id },
-      });
-    }
-
-    if (!conversation) {
-      conversation = await prisma.chatConversation.create({
-        data: {
-          userId: session.user.id,
-          title: "New Chat",
-        },
-      });
-    }
-
-    // 2. Identify the last user message
     const lastUserMessage = messages[messages.length - 1];
     const userContent = lastUserMessage?.content || "";
     const userImage = lastUserMessage?.image || null;
 
-    // Save user message to database
-    await prisma.chatMessage.create({
-      data: {
-        conversationId: conversation.id,
-        role: "user",
-        content: userContent,
-        imageUrl: userImage ? userImage.slice(0, 200) : null, // Store reference/indicator if attached
-      },
-    });
+    // 1. Resolve logged-in DB user (graceful fallback)
+    const dbUser = await getAuthenticatedDbUser();
+    let conversation: { id: string; title: string } | null = null;
 
-    // Update title if it's currently "New Chat"
-    if (conversation.title === "New Chat" && userContent) {
-      const generatedTitle = generateTitleFromPrompt(userContent);
-      await prisma.chatConversation.update({
-        where: { id: conversation.id },
-        data: { title: generatedTitle },
-      });
+    // 2. Safely create or locate conversation thread in database
+    if (dbUser) {
+      try {
+        if (conversationId) {
+          conversation = await prisma.chatConversation.findFirst({
+            where: { id: conversationId, userId: dbUser.id },
+          });
+        }
+
+        if (!conversation) {
+          conversation = await prisma.chatConversation.create({
+            data: {
+              userId: dbUser.id,
+              title: "New Chat",
+            },
+          });
+        }
+
+        // Save incoming user message
+        await prisma.chatMessage.create({
+          data: {
+            conversationId: conversation.id,
+            role: "user",
+            content: userContent,
+            imageUrl: userImage ? userImage.slice(0, 200) : null,
+          },
+        });
+
+        // Auto-title thread from first prompt if "New Chat"
+        if (conversation.title === "New Chat" && userContent) {
+          const generatedTitle = generateTitleFromPrompt(userContent);
+          await prisma.chatConversation.update({
+            where: { id: conversation.id },
+            data: { title: generatedTitle },
+          });
+        }
+      } catch (dbErr) {
+        console.warn("Database conversation save error (continuing with AI generation):", dbErr);
+      }
     }
 
     // 3. Generate AI Response
     let aiResponse = "";
+    try {
+      // Try multi-turn chat with Cloudflare / Ollama first
+      const chatResponse = await chatWithOllama(messages, SYSTEM_PROMPT);
 
-    // Try multi-turn chat with Cloudflare / Ollama first
-    const chatResponse = await chatWithOllama(messages, SYSTEM_PROMPT);
+      if (chatResponse) {
+        aiResponse = chatResponse;
+      } else {
+        // Fallback single-turn generate
+        const conversationHistory = messages
+          .slice(-6)
+          .map((m: { role: string; content: string }) => `${m.role === "user" ? "Student" : "Copilot"}: ${m.content}`)
+          .join("\n");
 
-    if (chatResponse) {
-      aiResponse = chatResponse;
-    } else {
-      // Fallback single-turn generate
-      const conversationHistory = messages
-        .slice(-6)
-        .map((m: { role: string; content: string }) => `${m.role === "user" ? "Student" : "Copilot"}: ${m.content}`)
-        .join("\n");
-
-      const fallbackPrompt = `${conversationHistory}\nStudent: ${userContent}\nCopilot:`;
-      aiResponse = await generateAIResponse(fallbackPrompt, SYSTEM_PROMPT);
+        const fallbackPrompt = `${conversationHistory}\nStudent: ${userContent}\nCopilot:`;
+        aiResponse = await generateAIResponse(fallbackPrompt, SYSTEM_PROMPT);
+      }
+    } catch (aiErr) {
+      console.error("AI Generation error:", aiErr);
+      aiResponse = "I'm having a brief issue reaching the AI inference engine. Please try asking again in a moment.";
     }
 
-    // 4. Save AI Response to database
-    await prisma.chatMessage.create({
-      data: {
-        conversationId: conversation.id,
-        role: "assistant",
-        content: aiResponse,
-      },
-    });
+    // 4. Safely save Assistant Response to database
+    if (dbUser && conversation) {
+      try {
+        await prisma.chatMessage.create({
+          data: {
+            conversationId: conversation.id,
+            role: "assistant",
+            content: aiResponse,
+          },
+        });
 
-    // Touch conversation updatedAt
-    await prisma.chatConversation.update({
-      where: { id: conversation.id },
-      data: { updatedAt: new Date() },
-    });
+        await prisma.chatConversation.update({
+          where: { id: conversation.id },
+          data: { updatedAt: new Date() },
+        });
+      } catch (dbErr) {
+        console.warn("Database assistant save error:", dbErr);
+      }
+    }
 
     return NextResponse.json({
       response: aiResponse,
-      conversationId: conversation.id,
+      conversationId: conversation?.id || null,
     });
   } catch (error) {
-    console.error("Copilot chat error:", error);
+    console.error("Copilot chat route error:", error);
     return NextResponse.json(
-      { error: "Failed to communicate with AI Copilot" },
-      { status: 500 }
+      {
+        response:
+          "I'm here to help with your placement preparation! What Data Structures, Algorithms, or Core CS doubt would you like to solve?",
+      },
+      { status: 200 }
     );
   }
 }
