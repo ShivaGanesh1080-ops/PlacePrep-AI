@@ -57,7 +57,12 @@ export default function InteractiveCodeBlock({
 
   const [showLivePreview, setShowLivePreview] = useState(isHtml);
   const [showStdin, setShowStdin] = useState(
-    !isWebCode && (initialCode.includes("input(") || initialCode.includes("readline"))
+    !isWebCode &&
+      (initialCode.includes("input(") ||
+        initialCode.includes("readline") ||
+        initialCode.includes("cin") ||
+        initialCode.includes("scanf") ||
+        initialCode.includes("Scanner"))
   );
 
   const [result, setResult] = useState<{
