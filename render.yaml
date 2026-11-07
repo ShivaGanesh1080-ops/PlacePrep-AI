@@ -3,6 +3,7 @@ services:
     name: placeprep-ai
     env: node
     plan: free
+    autoDeploy: true
     buildCommand: npm install && npx prisma db push && node prisma/seed.js && npm run build
     startCommand: npm run start
     healthCheckPath: /api/health
@@ -10,7 +11,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: NEXTAUTH_URL
-        sync: false
+        value: https://placeprep-ai-r9xo.onrender.com
       - key: NEXTAUTH_SECRET
         generateValue: true
       - key: DATABASE_URL

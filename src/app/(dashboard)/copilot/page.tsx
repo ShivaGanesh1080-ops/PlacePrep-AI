@@ -20,6 +20,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Search,
+  History,
 } from "lucide-react";
 
 interface Message {
@@ -57,7 +58,9 @@ const THINKING_STEPS = [
 export default function CopilotPage() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  
+  // Responsive sidebar state: open on desktop (md+), closed by default on mobile
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState("");
@@ -80,6 +83,13 @@ export default function CopilotPage() {
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Set default sidebar open state based on screen size on mount
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.innerWidth >= 768) {
+      setIsSidebarOpen(true);
+    }
+  }, []);
 
   // Load chat conversations on mount (continue where user stopped)
   useEffect(() => {
@@ -126,6 +136,12 @@ export default function CopilotPage() {
   async function loadConversationMessages(convId: string) {
     setCurrentConversationId(convId);
     setLoadingMessages(true);
+    
+    // Close sidebar on mobile when a chat is selected
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
+      setIsSidebarOpen(false);
+    }
+
     try {
       const res = await fetch(`/api/copilot/conversations/${convId}`);
       if (res.ok) {
@@ -155,6 +171,9 @@ export default function CopilotPage() {
     setMessages([initialGreeting]);
     setAttachedImage(null);
     setInput("");
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
+      setIsSidebarOpen(false);
+    }
   }
 
   async function handleDeleteConversation(convId: string, e: React.MouseEvent) {
@@ -283,12 +302,14 @@ export default function CopilotPage() {
           }
         }
       } else {
+        const errData = await res.json().catch(() => null);
         setMessages((prev) => [
           ...prev,
           {
             role: "assistant",
             content:
-              "Sorry, I encountered an issue formulating a response. Please check your network connection or try asking again.",
+              errData?.response ||
+              "I'm here to help with your placement preparation! What Data Structures, Algorithms, or Core CS doubt would you like to solve?",
           },
         ]);
       }
@@ -360,8 +381,156 @@ export default function CopilotPage() {
 
   const activeConversation = conversations.find((c) => c.id === currentConversationId);
 
+  const HistorySidebarContent = () => (
+    <>
+      {/* Sidebar Header: New Chat Button */}
+      <div className="p-3 border-b border-slate-200/70 space-y-2.5 bg-white/70">
+        <div className="flex items-center justify-between">
+          <button
+            onClick={handleNewChat}
+            className="flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-xs hover:shadow-sm transition-all cursor-pointer group"
+          >
+            <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform" />
+            <span>New Chat</span>
+          </button>
+
+          {/* Close button on mobile modal drawer */}
+          <button
+            onClick={() => setIsSidebarOpen(false)}
+            className="md:hidden ml-2 p-2 rounded-xl text-slate-500 hover:bg-slate-200/60"
+            title="Close history"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Search Box */}
+        <div className="relative">
+          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            placeholder="Search chats..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-7 pr-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          />
+        </div>
+      </div>
+
+      {/* Conversation List */}
+      <div className="flex-1 overflow-y-auto p-2 space-y-1">
+        {loadingHistory ? (
+          <div className="p-4 flex items-center justify-center gap-2 text-xs text-slate-400">
+            <Loader2 className="w-4 h-4 animate-spin text-indigo-500" />
+            <span>Loading past chats...</span>
+          </div>
+        ) : filteredConversations.length === 0 ? (
+          <div className="p-6 text-center text-xs text-slate-400">
+            <MessageSquare className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+            <p className="font-semibold text-slate-600">No chat history yet</p>
+            <p className="text-[11px] mt-1 text-slate-400">
+              Start asking doubts and your conversations will appear here automatically!
+            </p>
+          </div>
+        ) : (
+          filteredConversations.map((conv) => {
+            const isActive = conv.id === currentConversationId;
+            const isEditing = editingId === conv.id;
+
+            return (
+              <div
+                key={conv.id}
+                onClick={() => !isEditing && loadConversationMessages(conv.id)}
+                className={`group relative flex items-center justify-between p-2.5 rounded-xl text-xs cursor-pointer transition-all ${
+                  isActive
+                    ? "bg-white text-indigo-700 font-semibold border border-indigo-200/90 shadow-xs"
+                    : "text-slate-700 hover:bg-slate-100/70 border border-transparent"
+                }`}
+              >
+                {isEditing ? (
+                  <form
+                    onSubmit={(e) => handleSaveTitle(conv.id, e)}
+                    className="flex-1 flex items-center gap-1"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <input
+                      type="text"
+                      value={editTitle}
+                      onChange={(e) => setEditTitle(e.target.value)}
+                      className="w-full px-2 py-0.5 text-xs border border-indigo-300 rounded bg-white text-slate-900 focus:outline-none"
+                      autoFocus
+                    />
+                    <button
+                      type="submit"
+                      className="p-1 text-emerald-600 hover:bg-emerald-50 rounded"
+                    >
+                      <Check className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditingId(null)}
+                      className="p-1 text-slate-400 hover:bg-slate-100 rounded"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </form>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-2 overflow-hidden flex-1 mr-1">
+                      <MessageSquare
+                        className={`w-3.5 h-3.5 shrink-0 ${
+                          isActive ? "text-indigo-600" : "text-slate-400 group-hover:text-slate-600"
+                        }`}
+                      />
+                      <span className="truncate">{conv.title}</span>
+                    </div>
+
+                    {/* Action buttons (Rename & Delete) on hover */}
+                    <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingId(conv.id);
+                          setEditTitle(conv.title);
+                        }}
+                        className="p-1 rounded text-slate-400 hover:text-indigo-600 hover:bg-slate-200/60"
+                        title="Rename thread"
+                      >
+                        <Edit2 className="w-3 h-3" />
+                      </button>
+                      <button
+                        onClick={(e) => handleDeleteConversation(conv.id, e)}
+                        className="p-1 rounded text-slate-400 hover:text-red-600 hover:bg-slate-200/60"
+                        title="Delete thread"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* Sidebar Footer: Clear History */}
+      {conversations.length > 0 && (
+        <div className="p-2.5 border-t border-slate-200/70 bg-white/40">
+          <button
+            onClick={handleClearAllHistory}
+            className="w-full flex items-center justify-center gap-1.5 py-1 text-[11px] text-slate-500 hover:text-red-600 transition-colors cursor-pointer"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            <span>Clear History</span>
+          </button>
+        </div>
+      )}
+    </>
+  );
+
   return (
-    <div className="w-full h-[calc(100vh-7.5rem)] flex rounded-2xl border border-slate-200/90 bg-white shadow-sm overflow-hidden">
+    <div className="w-full h-[calc(100dvh-5.5rem)] sm:h-[calc(100vh-6.5rem)] flex rounded-2xl border border-slate-200/90 bg-white shadow-sm overflow-hidden relative">
       {/* Full-size Image Zoom Modal */}
       {expandedImage && (
         <div
@@ -385,162 +554,50 @@ export default function CopilotPage() {
         </div>
       )}
 
-      {/* Unified ChatGPT-Style Sidebar: Chat History */}
+      {/* MOBILE DRAWER BACKDROP (Only active on mobile when history is toggled open) */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-xs md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      {/* CHAT HISTORY SIDEBAR:
+          - On Desktop (md+): Smooth side-by-side collapsible pane
+          - On Mobile (<md): Slide-over drawer modal that takes 80vw without squeezing the chat! */}
       <aside
-        className={`transition-all duration-300 flex flex-col bg-slate-50/70 border-r border-slate-200/80 overflow-hidden shrink-0 ${
-          isSidebarOpen ? "w-64 sm:w-72" : "w-0 border-r-0"
+        className={`bg-slate-50/90 border-slate-200/80 transition-all duration-300 flex flex-col shrink-0 ${
+          // Mobile: Modal slide-over drawer
+          "fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] shadow-2xl border-r md:shadow-none md:static md:z-auto"
+        } ${
+          // Desktop: Collapsible width
+          isSidebarOpen
+            ? "translate-x-0 md:w-64 lg:w-72 md:border-r"
+            : "-translate-x-full md:translate-x-0 md:w-0 md:border-r-0 md:overflow-hidden"
         }`}
       >
-        {/* Sidebar Header: New Chat Button */}
-        <div className="p-3 border-b border-slate-200/70 space-y-2.5 bg-white/60">
-          <button
-            onClick={handleNewChat}
-            className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-xs hover:shadow-sm transition-all cursor-pointer group"
-          >
-            <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform" />
-            <span>New Chat</span>
-          </button>
-
-          {/* Search Box */}
-          <div className="relative">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Search chat history..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-7 pr-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-            />
-          </div>
-        </div>
-
-        {/* Conversation List */}
-        <div className="flex-1 overflow-y-auto p-2 space-y-1">
-          {loadingHistory ? (
-            <div className="p-4 flex items-center justify-center gap-2 text-xs text-slate-400">
-              <Loader2 className="w-4 h-4 animate-spin text-indigo-500" />
-              <span>Loading past chats...</span>
-            </div>
-          ) : filteredConversations.length === 0 ? (
-            <div className="p-6 text-center text-xs text-slate-400">
-              <MessageSquare className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-              <p className="font-semibold text-slate-600">No chat history yet</p>
-              <p className="text-[11px] mt-1 text-slate-400">
-                Start asking doubts and your conversations will appear here automatically!
-              </p>
-            </div>
-          ) : (
-            filteredConversations.map((conv) => {
-              const isActive = conv.id === currentConversationId;
-              const isEditing = editingId === conv.id;
-
-              return (
-                <div
-                  key={conv.id}
-                  onClick={() => !isEditing && loadConversationMessages(conv.id)}
-                  className={`group relative flex items-center justify-between p-2.5 rounded-xl text-xs cursor-pointer transition-all ${
-                    isActive
-                      ? "bg-white text-indigo-700 font-semibold border border-indigo-200/90 shadow-xs"
-                      : "text-slate-700 hover:bg-slate-100/70 border border-transparent"
-                  }`}
-                >
-                  {isEditing ? (
-                    <form
-                      onSubmit={(e) => handleSaveTitle(conv.id, e)}
-                      className="flex-1 flex items-center gap-1"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <input
-                        type="text"
-                        value={editTitle}
-                        onChange={(e) => setEditTitle(e.target.value)}
-                        className="w-full px-2 py-0.5 text-xs border border-indigo-300 rounded bg-white text-slate-900 focus:outline-none"
-                        autoFocus
-                      />
-                      <button
-                        type="submit"
-                        className="p-1 text-emerald-600 hover:bg-emerald-50 rounded"
-                      >
-                        <Check className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setEditingId(null)}
-                        className="p-1 text-slate-400 hover:bg-slate-100 rounded"
-                      >
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    </form>
-                  ) : (
-                    <>
-                      <div className="flex items-center gap-2 overflow-hidden flex-1 mr-1">
-                        <MessageSquare
-                          className={`w-3.5 h-3.5 shrink-0 ${
-                            isActive ? "text-indigo-600" : "text-slate-400 group-hover:text-slate-600"
-                          }`}
-                        />
-                        <span className="truncate">{conv.title}</span>
-                      </div>
-
-                      {/* Action buttons (Rename & Delete) on hover */}
-                      <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setEditingId(conv.id);
-                            setEditTitle(conv.title);
-                          }}
-                          className="p-1 rounded text-slate-400 hover:text-indigo-600 hover:bg-slate-200/60"
-                          title="Rename thread"
-                        >
-                          <Edit2 className="w-3 h-3" />
-                        </button>
-                        <button
-                          onClick={(e) => handleDeleteConversation(conv.id, e)}
-                          className="p-1 rounded text-slate-400 hover:text-red-600 hover:bg-slate-200/60"
-                          title="Delete thread"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </button>
-                      </div>
-                    </>
-                  )}
-                </div>
-              );
-            })
-          )}
-        </div>
-
-        {/* Sidebar Footer: Clear History */}
-        {conversations.length > 0 && (
-          <div className="p-2.5 border-t border-slate-200/70 bg-white/40">
-            <button
-              onClick={handleClearAllHistory}
-              className="w-full flex items-center justify-center gap-1.5 py-1 text-[11px] text-slate-500 hover:text-red-600 transition-colors cursor-pointer"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-              <span>Clear History</span>
-            </button>
-          </div>
-        )}
+        <HistorySidebarContent />
       </aside>
 
-      {/* Main Chat Workspace */}
-      <main className="flex-1 flex flex-col bg-white overflow-hidden min-w-0">
+      {/* Main Chat Workspace: Always full width on mobile! */}
+      <main className="flex-1 flex flex-col bg-white overflow-hidden min-w-0 h-full">
         {/* Workspace Top Bar */}
-        <div className="flex items-center justify-between py-2.5 px-4 border-b border-slate-200/80 bg-white shrink-0">
-          <div className="flex items-center gap-2.5 min-w-0">
-            {/* Toggle History Sidebar */}
+        <div className="flex items-center justify-between py-2 px-3 sm:py-2.5 sm:px-4 border-b border-slate-200/80 bg-white shrink-0">
+          <div className="flex items-center gap-2 min-w-0">
+            {/* Toggle History Sidebar button */}
             <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
               className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors shrink-0 cursor-pointer"
               title={isSidebarOpen ? "Collapse chat history" : "Open chat history"}
             >
-              {isSidebarOpen ? (
-                <PanelLeftClose className="w-4 h-4" />
-              ) : (
-                <PanelLeftOpen className="w-4 h-4" />
-              )}
+              <History className="w-4 h-4 md:hidden text-indigo-600" />
+              <span className="hidden md:block">
+                {isSidebarOpen ? (
+                  <PanelLeftClose className="w-4 h-4" />
+                ) : (
+                  <PanelLeftOpen className="w-4 h-4" />
+                )}
+              </span>
             </button>
 
             <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-indigo-600 to-blue-500 text-white flex items-center justify-center shadow-xs shrink-0">
@@ -548,12 +605,13 @@ export default function CopilotPage() {
             </div>
 
             <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <h2 className="text-xs sm:text-sm font-bold text-slate-900 truncate">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <h2 className="text-xs sm:text-sm font-bold text-slate-900 truncate max-w-[140px] sm:max-w-xs md:max-w-md">
                   {activeConversation ? activeConversation.title : "Prep AI Mentor"}
                 </h2>
-                <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Active Copilot
+                <span className="inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="hidden xs:inline">Active</span>
                 </span>
               </div>
               <p className="text-[10px] text-slate-400 hidden sm:block truncate">
@@ -562,19 +620,19 @@ export default function CopilotPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1.5 shrink-0">
             <button
               onClick={handleNewChat}
-              className="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 border border-indigo-200 rounded-lg transition-colors cursor-pointer"
+              className="flex items-center gap-1 px-2 py-1 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 border border-indigo-200 rounded-lg transition-colors cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>New</span>
+              <span className="hidden sm:inline">New</span>
             </button>
           </div>
         </div>
 
         {/* Chat Messages Scroll Container */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
+        <div className="flex-1 overflow-y-auto p-3 sm:p-5 space-y-3.5">
           {loadingMessages ? (
             <div className="h-full flex items-center justify-center gap-2 text-xs text-slate-400">
               <Loader2 className="w-5 h-5 animate-spin text-indigo-500" />
@@ -585,18 +643,18 @@ export default function CopilotPage() {
               {messages.map((msg, idx) => (
                 <div
                   key={idx}
-                  className={`flex gap-3 ${
+                  className={`flex gap-2 sm:gap-3 ${
                     msg.role === "user" ? "justify-end" : "justify-start"
                   }`}
                 >
                   {msg.role === "assistant" && (
-                    <div className="w-7 h-7 rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-500 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
+                    <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg sm:rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-500 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
                       <Bot className="w-3.5 h-3.5" />
                     </div>
                   )}
 
                   <div
-                    className={`relative group max-w-[88%] sm:max-w-[82%] rounded-2xl px-4 py-3 shadow-xs ${
+                    className={`relative group max-w-[90%] sm:max-w-[82%] rounded-2xl px-3.5 py-2.5 sm:px-4 sm:py-3 shadow-xs ${
                       msg.role === "user"
                         ? "bg-indigo-600 text-white rounded-tr-xs"
                         : "bg-slate-50 text-slate-800 border border-slate-200/80 rounded-tl-xs"
@@ -613,7 +671,7 @@ export default function CopilotPage() {
                           <img
                             src={msg.image}
                             alt="Attached Problem Statement"
-                            className="max-h-56 max-w-full rounded-xl object-cover hover:scale-102 transition-transform duration-200"
+                            className="max-h-48 sm:max-h-56 max-w-full rounded-xl object-cover hover:scale-102 transition-transform duration-200"
                           />
                           <div className="absolute inset-0 bg-black/30 opacity-0 group-hover/img:opacity-100 flex items-center justify-center transition-opacity">
                             <span className="text-[11px] font-bold text-white bg-black/60 px-2.5 py-1 rounded-full flex items-center gap-1">
@@ -628,7 +686,7 @@ export default function CopilotPage() {
                     {msg.role === "assistant" && (
                       <button
                         onClick={() => handleCopy(msg.content, idx)}
-                        className="absolute top-2 right-2 p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute top-2 right-2 p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 opacity-0 group-hover:opacity-100 transition-opacity"
                         title="Copy message"
                       >
                         {copiedIdx === idx ? (
@@ -640,9 +698,9 @@ export default function CopilotPage() {
                     )}
 
                     {/* Content */}
-                    <div className="text-sm">
+                    <div className="text-xs sm:text-sm leading-relaxed overflow-x-auto">
                       {msg.role === "user" ? (
-                        <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                        <p className="whitespace-pre-wrap">{msg.content}</p>
                       ) : (
                         renderMessageContent(msg.content)
                       )}
@@ -650,7 +708,7 @@ export default function CopilotPage() {
                   </div>
 
                   {msg.role === "user" && (
-                    <div className="w-7 h-7 rounded-xl bg-slate-800 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
+                    <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg sm:rounded-xl bg-slate-800 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
                       <User className="w-3.5 h-3.5" />
                     </div>
                   )}
@@ -659,16 +717,16 @@ export default function CopilotPage() {
 
               {/* Dynamic Thinking Bubble */}
               {loading && (
-                <div className="flex gap-3 justify-start animate-in fade-in duration-200">
-                  <div className="w-7 h-7 rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-500 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
+                <div className="flex gap-2 sm:gap-3 justify-start animate-in fade-in duration-200">
+                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg sm:rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-500 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
                     <Bot className="w-3.5 h-3.5" />
                   </div>
-                  <div className="bg-slate-50 border border-slate-200/80 rounded-2xl rounded-tl-xs px-4 py-3 shadow-xs flex items-center gap-3 text-xs text-slate-600">
-                    <span className="relative flex h-2.5 w-2.5">
+                  <div className="bg-slate-50 border border-slate-200/80 rounded-2xl rounded-tl-xs px-3.5 py-2.5 shadow-xs flex items-center gap-2.5 text-xs text-slate-600">
+                    <span className="relative flex h-2 w-2">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-indigo-600"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-600"></span>
                     </span>
-                    <span className="font-medium animate-pulse">
+                    <span className="font-medium animate-pulse text-[11px] sm:text-xs">
                       {THINKING_STEPS[thinkingIdx]}
                     </span>
                   </div>
@@ -680,18 +738,18 @@ export default function CopilotPage() {
           )}
         </div>
 
-        {/* Suggested Doubts Chips (Only visible in brand new chat with initial message) */}
+        {/* Suggested Doubts Chips */}
         {messages.length === 1 && !loading && (
-          <div className="px-4 py-2 bg-slate-50/70 border-t border-slate-100 shrink-0">
-            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+          <div className="px-3 py-2 sm:px-4 bg-slate-50/70 border-t border-slate-100 shrink-0 overflow-x-auto">
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 flex items-center gap-1">
               <span>⚡</span> Suggested Placement Doubts
             </p>
             <div className="flex flex-wrap gap-1.5">
-              {SUGGESTED_PROMPTS.map((prompt, i) => (
+              {SUGGESTED_PROMPTS.slice(0, 4).map((prompt, i) => (
                 <button
                   key={i}
                   onClick={() => handleSend(prompt)}
-                  className="text-xs bg-white hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200 text-slate-600 px-3 py-1.5 rounded-xl border border-slate-200 transition-all text-left shadow-xs cursor-pointer"
+                  className="text-[11px] sm:text-xs bg-white hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200 text-slate-600 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl border border-slate-200 transition-all text-left shadow-xs cursor-pointer truncate max-w-full"
                 >
                   {prompt}
                 </button>
@@ -702,34 +760,34 @@ export default function CopilotPage() {
 
         {/* Image Attachment Preview Ribbon */}
         {attachedImage && (
-          <div className="px-4 py-2 bg-indigo-50/60 border-t border-indigo-100 flex items-center justify-between shrink-0">
+          <div className="px-3 py-1.5 sm:px-4 sm:py-2 bg-indigo-50/60 border-t border-indigo-100 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-2">
-              <div className="relative w-10 h-10 rounded-lg overflow-hidden border border-indigo-200 shadow-xs">
+              <div className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-lg overflow-hidden border border-indigo-200 shadow-xs">
                 <img src={attachedImage} alt="Attachment thumbnail" className="w-full h-full object-cover" />
               </div>
-              <div className="text-xs">
+              <div className="text-[11px] sm:text-xs">
                 <p className="font-bold text-indigo-900">Problem Image Attached</p>
-                <p className="text-[10px] text-indigo-600">Will be analyzed by Cloudflare Vision</p>
+                <p className="text-[9px] sm:text-[10px] text-indigo-600">Analyzed by Cloudflare Vision</p>
               </div>
             </div>
             <button
               onClick={() => setAttachedImage(null)}
-              className="p-1.5 rounded-full hover:bg-indigo-200/60 text-indigo-700 transition"
+              className="p-1 rounded-full hover:bg-indigo-200/60 text-indigo-700 transition"
               title="Remove image"
             >
-              <X className="w-4 h-4" />
+              <X className="w-3.5 h-3.5" />
             </button>
           </div>
         )}
 
         {/* Sticky Input Bar */}
-        <div className="p-3 border-t border-slate-200/80 bg-white shrink-0">
+        <div className="p-2 sm:p-3 border-t border-slate-200/80 bg-white shrink-0">
           <form
             onSubmit={(e) => {
               e.preventDefault();
               handleSend();
             }}
-            className="flex items-center gap-2"
+            className="flex items-center gap-1.5 sm:gap-2"
           >
             {/* Hidden File Input */}
             <input
@@ -744,7 +802,7 @@ export default function CopilotPage() {
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className={`p-2.5 rounded-xl border transition-colors cursor-pointer shrink-0 ${
+              className={`p-2 sm:p-2.5 rounded-xl border transition-colors cursor-pointer shrink-0 ${
                 attachedImage
                   ? "bg-indigo-100 text-indigo-700 border-indigo-300"
                   : "bg-slate-50 text-slate-500 hover:text-slate-800 border-slate-200 hover:bg-slate-100"
@@ -759,16 +817,16 @@ export default function CopilotPage() {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask anything (e.g. explain AVL rotation, trace Dijkstra's algorithm, ask mock HR question)..."
+              placeholder="Ask any DSA doubt or interview query..."
               disabled={loading}
-              className="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:opacity-50 text-slate-900 placeholder:text-slate-400"
+              className="flex-1 px-3 py-2 sm:px-4 sm:py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:opacity-50 text-slate-900 placeholder:text-slate-400"
             />
 
             {/* Send Button */}
             <button
               type="submit"
               disabled={loading || (!input.trim() && !attachedImage)}
-              className="p-2.5 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm transition-all cursor-pointer shrink-0"
+              className="p-2 sm:p-2.5 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm transition-all cursor-pointer shrink-0"
             >
               <Send className="w-4 h-4" />
             </button>
