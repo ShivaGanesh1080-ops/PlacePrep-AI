@@ -3,7 +3,9 @@ const bcrypt = require("bcryptjs");
 const prisma = new PrismaClient();
 async function main() {
     console.log("🌱 Starting Placement Portal Database Seeding...");
-    // Clean existing data
+    // Clean existing data in reverse relational order
+    await prisma.chatMessage.deleteMany({});
+    await prisma.chatConversation.deleteMany({});
     await prisma.companyApplication.deleteMany({});
     await prisma.company.deleteMany({});
     await prisma.testAttempt.deleteMany({});
@@ -15,9 +17,10 @@ async function main() {
     await prisma.user.deleteMany({});
     const hashedPasswordAdmin = await bcrypt.hash("admin123", 10);
     const hashedPasswordStudent = await bcrypt.hash("student123", 10);
-    // 1. Create Admin
+    // 1. Create Admin (Deterministic ID to prevent session desync across restarts)
     const admin = await prisma.user.create({
         data: {
+            id: "user-admin-placement-head",
             name: "Placement Cell Head",
             email: "admin@placeprep.ai",
             password: hashedPasswordAdmin,
@@ -25,9 +28,10 @@ async function main() {
         },
     });
     console.log("✅ Admin user created: admin@placeprep.ai");
-    // 2. Create Demo Students
+    // 2. Create Demo Students (Deterministic IDs to prevent session desync across restarts)
     const student1 = await prisma.user.create({
         data: {
+            id: "user-shiva-ganesh-akku",
             name: "Shiva Ganesh Akku",
             email: "shiva@student.com",
             password: hashedPasswordStudent,
@@ -67,6 +71,7 @@ async function main() {
     });
     const student2 = await prisma.user.create({
         data: {
+            id: "user-demo-candidate",
             name: "Demo Candidate",
             email: "demo@student.com",
             password: hashedPasswordStudent,

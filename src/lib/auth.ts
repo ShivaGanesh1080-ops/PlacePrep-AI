@@ -71,8 +71,27 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       if (session.user) {
-        (session.user as { id: string; role: string }).id = token.id as string;
-        (session.user as { id: string; role: string }).role = token.role as string;
+        let currentUserId = (token.id as string) || "";
+        let currentUserRole = ((token.role as string) || "STUDENT");
+
+        // Bulletproof sync: Always ensure session user ID matches live database user ID
+        if (session.user.email) {
+          try {
+            const dbUser = await prisma.user.findUnique({
+              where: { email: session.user.email.toLowerCase().trim() },
+              select: { id: true, role: true },
+            });
+            if (dbUser) {
+              currentUserId = dbUser.id;
+              currentUserRole = dbUser.role;
+            }
+          } catch (err) {
+            console.warn("Session user sync warning:", err);
+          }
+        }
+
+        (session.user as { id: string; role: string }).id = currentUserId;
+        (session.user as { id: string; role: string }).role = currentUserRole;
       }
       return session;
     },
