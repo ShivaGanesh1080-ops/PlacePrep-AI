@@ -19,6 +19,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Menu,
+  Building2,
 } from "lucide-react";
 
 interface NavItem {
@@ -35,6 +36,7 @@ const navItems: NavItem[] = [
   { label: "Aptitude Tests", href: "/tests", icon: ClipboardCheck },
   { label: "Mock Interview", href: "/interview", icon: MessageSquare },
   { label: "Resume Intelligence", href: "/resume", icon: FileText },
+  { label: "Campus Drives", href: "/companies", icon: Building2 },
   { label: "My Profile", href: "/profile", icon: User },
   { label: "Admin Panel", href: "/admin", icon: Settings, adminOnly: true },
 ];

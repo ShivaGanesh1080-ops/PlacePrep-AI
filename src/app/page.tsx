@@ -8,286 +8,425 @@ import {
   ClipboardCheck,
   MessageSquare,
   FileText,
-  BarChart3,
   ArrowRight,
-  Sparkles,
-  Users,
-  Target,
-  TrendingUp,
-  Bot,
-  Zap,
+  Terminal,
   CheckCircle2,
-  Award,
+  Code2,
+  Building2,
+  Cpu,
+  Layers,
+  Sparkles,
 } from "lucide-react";
-
-const features = [
-  {
-    icon: Brain,
-    title: "AI Career Guidance",
-    description:
-      "Get personalized career recommendations powered by AI based on your skills, interests, and academic performance.",
-    color: "from-violet-500 to-purple-600",
-    shadow: "shadow-purple-500/20",
-    border: "hover:border-purple-300",
-  },
-  {
-    icon: ClipboardCheck,
-    title: "Aptitude Tests",
-    description:
-      "Practice with comprehensive aptitude tests covering quantitative, verbal, and logical reasoning sections.",
-    color: "from-blue-500 to-cyan-600",
-    shadow: "shadow-blue-500/20",
-    border: "hover:border-blue-300",
-  },
-  {
-    icon: MessageSquare,
-    title: "Mock Interviews",
-    description:
-      "Prepare with AI-powered mock interviews with real-time feedback and detailed performance analysis.",
-    color: "from-emerald-500 to-teal-600",
-    shadow: "shadow-emerald-500/20",
-    border: "hover:border-emerald-300",
-  },
-  {
-    icon: FileText,
-    title: "Resume Analyzer",
-    description:
-      "Upload your resume and get AI-powered suggestions to make it stand out to top recruiters.",
-    color: "from-orange-500 to-amber-600",
-    shadow: "shadow-orange-500/20",
-    border: "hover:border-orange-300",
-  },
-  {
-    icon: Bot,
-    title: "Prep AI Assistant",
-    description:
-      "Ask any coding, DSA, or technical doubt with instant AI code solutions and complexity analysis.",
-    color: "from-pink-500 to-rose-600",
-    shadow: "shadow-pink-500/20",
-    border: "hover:border-pink-300",
-  },
-  {
-    icon: BarChart3,
-    title: "Progress Dashboard",
-    description:
-      "Monitor your preparation progress with detailed analytics and actionable insights.",
-    color: "from-indigo-500 to-blue-600",
-    shadow: "shadow-indigo-500/20",
-    border: "hover:border-indigo-300",
-  },
-];
-
-const stats = [
-  { icon: Users, value: "500+", label: "Students Enrolled" },
-  { icon: Target, value: "95%", label: "Placement Success Rate" },
-  { icon: Sparkles, value: "100%", label: "Curated Placement MCQs" },
-];
 
 export default function LandingPage() {
   const { data: session } = useSession();
 
   return (
-    <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-indigo-500 selection:text-white overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50/50 text-slate-900 font-sans selection:bg-indigo-600 selection:text-white">
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-blue-600 to-cyan-500 text-white">
-        {/* Animated Radial Ambient Orbs (Motion) */}
-        <div className="absolute -top-24 -left-24 w-96 h-96 bg-cyan-400/30 rounded-full blur-3xl pointer-events-none animate-pulse-glow" />
-        <div className="absolute top-1/2 -right-24 w-[450px] h-[450px] bg-indigo-400/25 rounded-full blur-3xl pointer-events-none animate-pulse-glow" style={{ animationDelay: "2s" }} />
-        <div className="absolute -bottom-20 left-1/3 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl pointer-events-none animate-pulse-glow" style={{ animationDelay: "4s" }} />
+      <section className="relative pt-16 pb-20 sm:pt-24 sm:pb-28 border-b border-slate-200/70 overflow-hidden">
+        {/* Subtle engineering grid background */}
+        <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:24px_24px] opacity-40 pointer-events-none" />
 
-        {/* Subtle Geometric Overlay */}
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0aDR2MWgtNHYtMXptMC0yaDB2MWgtNHYtMXptMC0yaDB2MWgtNHYtMXoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-25 pointer-events-none" />
-
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-28 sm:pt-28 sm:pb-36 lg:pt-36 lg:pb-44">
-          <div className="text-center max-w-4xl mx-auto relative z-10">
-            {/* Top Pill with floating animation */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/15 backdrop-blur-md rounded-full border border-white/25 mb-8 shadow-lg animate-float">
-              <Sparkles className="w-4 h-4 text-yellow-300 animate-spin" style={{ animationDuration: "6s" }} />
-              <span className="text-xs sm:text-sm font-semibold tracking-wide text-white drop-shadow-sm">
-                Powered by Advanced AI Mentorship
-              </span>
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto">
+            {/* Context Badge */}
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-700 text-xs font-medium mb-6">
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-600" />
+              <span>Campus Placement Intelligence Workspace</span>
             </div>
 
-            {/* Headline with smooth entrance motion */}
-            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold text-white tracking-tight leading-[1.1] animate-in fade-in slide-in-from-bottom duration-500">
-              AI-Powered
-              <br />
-              <span className="bg-gradient-to-r from-yellow-200 via-amber-300 to-yellow-400 bg-clip-text text-transparent drop-shadow-sm">
-                Placement Preparation
-              </span>
+            {/* Headline */}
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold text-slate-900 tracking-tight leading-[1.12]">
+              Master your technical placement rounds
             </h1>
 
-            <p className="mt-6 text-base sm:text-xl text-blue-100 max-w-3xl mx-auto leading-relaxed font-normal animate-in fade-in slide-in-from-bottom duration-700">
-              Get personalized career recommendations, practice aptitude tests,
-              ace mock interviews, and track your preparation — all powered by
-              cutting-edge AI technology.
+            {/* Subhead */}
+            <p className="mt-5 text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed font-normal">
+              An integrated preparation environment for engineering students.
+              Solve DSA doubts with compiler diagnostics, simulate STAR-method
+              interviews, and benchmark readiness across core rounds.
             </p>
 
-            {/* CTA Buttons with motion & hover glow */}
-            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+            {/* CTAs */}
+            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link
                 href={session ? "/dashboard" : "/signup"}
-                className="group inline-flex items-center gap-2.5 px-8 py-4 bg-white text-indigo-600 font-bold rounded-2xl shadow-xl shadow-indigo-950/20 hover:shadow-2xl hover:scale-105 hover:bg-slate-50 transition-all duration-300 cursor-pointer text-sm sm:text-base"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-xs sm:text-sm rounded-xl transition-colors shadow-2xs"
               >
-                <span>{session ? "Go to Dashboard" : "Get Started Free"}</span>
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1.5 transition-transform duration-200" />
+                <span>{session ? "Enter workspace" : "Start preparing"}</span>
+                <ArrowRight className="w-4 h-4" />
               </Link>
-              <a
-                href="#features"
-                className="inline-flex items-center gap-2 px-8 py-4 text-white border-2 border-white/30 rounded-2xl hover:bg-white/10 hover:border-white/60 backdrop-blur-xs transition-all duration-300 font-semibold text-sm sm:text-base cursor-pointer"
+              <Link
+                href="/login"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-white hover:bg-slate-50 text-slate-700 font-medium text-xs sm:text-sm rounded-xl border border-slate-200 transition-colors shadow-2xs"
               >
-                Explore Features
-              </a>
-            </div>
-
-            {/* Floating Live Motion Chips (Subtle Levitation) */}
-            <div className="mt-12 hidden md:flex items-center justify-center gap-4 flex-wrap">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs text-white/90 shadow-md animate-float" style={{ animationDelay: "0.2s" }}>
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="font-semibold">Cloudflare Fast AI Active</span>
-              </div>
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs text-white/90 shadow-md animate-float-reverse" style={{ animationDelay: "1s" }}>
-                <CheckCircle2 className="w-3.5 h-3.5 text-yellow-300" />
-                <span className="font-semibold">120+ Curated Placement MCQs</span>
-              </div>
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs text-white/90 shadow-md animate-float" style={{ animationDelay: "1.8s" }}>
-                <Zap className="w-3.5 h-3.5 text-cyan-300" />
-                <span className="font-semibold">&lt; 1s Response Latency</span>
-              </div>
+                <span>Try demo account</span>
+              </Link>
             </div>
           </div>
-        </div>
 
-        {/* Bottom Smooth Transition Wave */}
-        <div className="absolute bottom-0 left-0 right-0 overflow-hidden leading-none z-10">
-          <svg
-            className="w-full h-12 sm:h-20 lg:h-28 text-white fill-current"
-            viewBox="0 0 1440 120"
-            preserveAspectRatio="none"
-          >
-            <path d="M0 120L60 105C120 90 240 60 360 45C480 30 600 30 720 37.5C840 45 960 60 1080 67.5C1200 75 1320 75 1380 75L1440 75V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" />
-          </svg>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section id="features" className="py-20 sm:py-28 bg-white relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 border border-indigo-200/60 px-3.5 py-1.5 rounded-full">
-              Comprehensive Portal Architecture
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 mt-4">
-              Everything You Need to{" "}
-              <span className="bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">
-                Get Placed
-              </span>
-            </h2>
-            <p className="mt-4 text-base sm:text-lg text-slate-600 max-w-2xl mx-auto font-normal">
-              Comprehensive tools and AI-powered features designed to maximize
-              your placement success across every technical round.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feature, idx) => (
-              <div
-                key={feature.title}
-                className={`group relative bg-white rounded-2xl border border-slate-200 p-8 hover:shadow-2xl ${feature.border} transition-all duration-300 hover:-translate-y-2 cursor-pointer`}
-              >
-                {/* Gradient Icon Badge with Hover Lift */}
-                <div
-                  className={`w-14 h-14 bg-gradient-to-br ${feature.color} rounded-2xl flex items-center justify-center shadow-lg ${feature.shadow} mb-6 group-hover:scale-110 group-hover:rotate-1 transition-all duration-300`}
-                >
-                  <feature.icon className="w-7 h-7 text-white" />
+          {/* Hero Moment: Real Product Preview in Code */}
+          <div className="mt-14 sm:mt-18 max-w-4xl mx-auto">
+            <div className="rounded-2xl border border-slate-300/80 bg-white shadow-xl shadow-slate-200/50 overflow-hidden">
+              {/* Window Title Bar */}
+              <div className="flex items-center justify-between px-4 py-3 bg-slate-900 text-slate-300 border-b border-slate-800 text-xs">
+                <div className="flex items-center gap-2">
+                  <div className="flex gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-slate-700" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-slate-700" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-slate-700" />
+                  </div>
+                  <span className="ml-2 font-mono text-[11px] text-slate-400">
+                    prep-copilot // TwoSum.cpp
+                  </span>
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-3 group-hover:text-indigo-600 transition-colors">
-                  {feature.title}
-                </h3>
-                <p className="text-slate-600 text-sm leading-relaxed">
-                  {feature.description}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Stats Section with Smooth Elevation */}
-      <section className="py-20 bg-gradient-to-br from-slate-50 via-blue-50/40 to-indigo-50/30 border-y border-slate-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900">
-              Trusted by Students Everywhere
-            </h2>
-            <p className="mt-3 text-base text-slate-600">
-              Our placement numbers speak for themselves.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            {stats.map((stat, idx) => (
-              <div
-                key={stat.label}
-                className="text-center bg-white rounded-2xl p-8 shadow-lg shadow-slate-200/50 border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
-              >
-                <div className="w-16 h-16 bg-gradient-to-br from-indigo-100 to-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-105 transition-transform">
-                  <stat.icon className="w-8 h-8 text-indigo-600" />
+                <div className="flex items-center gap-3 font-mono text-[11px]">
+                  <span className="text-emerald-400 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                    g++ -O2 active
+                  </span>
+                  <span className="text-slate-500">42ms</span>
                 </div>
-                <p className="text-4xl font-black bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">
-                  {stat.value}
-                </p>
-                <p className="mt-2 text-slate-600 font-semibold text-sm">{stat.label}</p>
               </div>
-            ))}
+
+              {/* Code Editor & Diagnostic Split Preview */}
+              <div className="grid grid-cols-1 md:grid-cols-12 bg-slate-950 font-mono text-xs">
+                {/* Code Window */}
+                <div className="md:col-span-7 p-4 border-b md:border-b-0 md:border-r border-slate-800 text-slate-300 overflow-x-auto leading-relaxed">
+                  <div className="flex items-start gap-3">
+                    <div className="text-slate-600 select-none text-right pr-2 border-r border-slate-800/80">
+                      <div>01</div>
+                      <div>02</div>
+                      <div>03</div>
+                      <div>04</div>
+                      <div>05</div>
+                      <div>06</div>
+                      <div>07</div>
+                      <div>08</div>
+                    </div>
+                    <div>
+                      <p><span className="text-indigo-400">#include</span> <span className="text-emerald-400">&lt;unordered_map&gt;</span></p>
+                      <p><span className="text-indigo-400">vector</span>&lt;<span className="text-amber-400">int</span>&gt; <span className="text-blue-400">twoSum</span>(<span className="text-indigo-400">vector</span>&lt;<span className="text-amber-400">int</span>&gt;&amp; nums, <span className="text-amber-400">int</span> target) &#123;</p>
+                      <p>&nbsp;&nbsp;<span className="text-indigo-400">unordered_map</span>&lt;<span className="text-amber-400">int</span>, <span className="text-amber-400">int</span>&gt; seen;</p>
+                      <p>&nbsp;&nbsp;<span className="text-indigo-400">for</span> (<span className="text-amber-400">int</span> i = <span className="text-cyan-400">0</span>; i &lt; nums.size(); ++i) &#123;</p>
+                      <p>&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-amber-400">int</span> complement = target - nums[i];</p>
+                      <p>&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-indigo-400">if</span> (seen.count(complement)) <span className="text-indigo-400">return</span> &#123;seen[complement], i&#125;;</p>
+                      <p>&nbsp;&nbsp;&nbsp;&nbsp;seen[nums[i]] = i;</p>
+                      <p>&nbsp;&nbsp;&#125; <span className="text-indigo-400">return</span> &#123;&#125;; &#125;</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Diagnostics & STAR Output */}
+                <div className="md:col-span-5 p-4 bg-slate-900/60 flex flex-col justify-between space-y-4">
+                  <div>
+                    <div className="flex items-center justify-between text-[11px] text-slate-400 mb-2 pb-1 border-b border-slate-800">
+                      <span>Terminal Diagnostic</span>
+                      <span className="text-emerald-400">Exit 0</span>
+                    </div>
+                    <p className="text-slate-300 text-[11px]">
+                      Input: <span className="text-slate-400">nums = [2,7,11,15], target = 9</span>
+                    </p>
+                    <p className="text-emerald-400 text-[11px] mt-1">
+                      Output: [0, 1] <span className="text-slate-500">(O(n) time, O(n) space)</span>
+                    </p>
+                  </div>
+
+                  <div className="p-3 rounded-lg bg-slate-900 border border-slate-800 text-[11px]">
+                    <div className="flex items-center justify-between text-slate-400 mb-1.5">
+                      <span className="font-sans font-medium text-slate-300">STAR Technical Evaluation</span>
+                      <span className="font-mono text-indigo-400 font-semibold">92 / 100</span>
+                    </div>
+                    <div className="space-y-1 text-slate-400 font-sans text-[10px]">
+                      <div className="flex justify-between">
+                        <span>Algorithmic Optimality</span>
+                        <span className="text-slate-200">24/25</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Edge Case Coverage</span>
+                        <span className="text-slate-200">23/25</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Complexity Explanation</span>
+                        <span className="text-slate-200">23/25</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Code Hygiene</span>
+                        <span className="text-slate-200">22/25</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 bg-white relative overflow-hidden">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
-          <div className="relative bg-gradient-to-br from-indigo-600 via-blue-600 to-cyan-600 rounded-3xl p-10 sm:p-16 shadow-2xl overflow-hidden">
-            {/* Ambient pulse orbs in banner */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-2xl animate-pulse-glow pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-cyan-300/15 rounded-full blur-2xl animate-pulse-glow pointer-events-none" style={{ animationDelay: "3s" }} />
+      {/* Core Platform Modules */}
+      <section id="features" className="py-20 sm:py-24 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="mb-12">
+          <p className="text-xs font-mono font-medium text-indigo-600 uppercase tracking-wider mb-1">
+            Core Modules
+          </p>
+          <h2 className="text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">
+            Designed for every stage of recruitment
+          </h2>
+          <p className="mt-2 text-sm text-slate-600 max-w-2xl">
+            Each round requires different cognitive skills. PlacePrep gives you dedicated tooling for every evaluation phase.
+          </p>
+        </div>
 
-            <div className="relative z-10">
-              <div className="w-16 h-16 bg-white/15 backdrop-blur-md rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-md border border-white/20 animate-float">
-                <TrendingUp className="w-8 h-8 text-yellow-300" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          {/* Module 1 */}
+          <div className="bg-white p-6 rounded-2xl border border-slate-200/80 hover:border-slate-300 transition-colors shadow-2xs flex flex-col justify-between">
+            <div>
+              <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-indigo-600 mb-4">
+                <Code2 className="w-5 h-5" />
               </div>
+              <h3 className="text-sm font-semibold text-slate-900 mb-1.5">
+                Prep AI Copilot & Sandbox
+              </h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Multilingual code execution in C++, Python, and Java. Upload screenshots of compiler errors for instant visual diagnosis.
+              </p>
+            </div>
+            <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-mono text-slate-400">
+              <span>Cloudflare Vision</span>
+              <span>C++17 • Py3</span>
+            </div>
+          </div>
 
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-4">
-                Ready to Start Your Journey?
+          {/* Module 2 */}
+          <div className="bg-white p-6 rounded-2xl border border-slate-200/80 hover:border-slate-300 transition-colors shadow-2xs flex flex-col justify-between">
+            <div>
+              <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-indigo-600 mb-4">
+                <MessageSquare className="w-5 h-5" />
+              </div>
+              <h3 className="text-sm font-semibold text-slate-900 mb-1.5">
+                STAR Mock Interviewer
+              </h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Adaptive technical and behavioral mock sessions. Generates structured feedback scored against the STAR framework.
+              </p>
+            </div>
+            <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-mono text-slate-400">
+              <span>Situation • Task</span>
+              <span>Action • Result</span>
+            </div>
+          </div>
+
+          {/* Module 3 */}
+          <div className="bg-white p-6 rounded-2xl border border-slate-200/80 hover:border-slate-300 transition-colors shadow-2xs flex flex-col justify-between">
+            <div>
+              <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-indigo-600 mb-4">
+                <ClipboardCheck className="w-5 h-5" />
+              </div>
+              <h3 className="text-sm font-semibold text-slate-900 mb-1.5">
+                Adaptive Aptitude Engine
+              </h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Timed assessments across Quantitative, Logical, Verbal, and Core CS with automated percentile benchmarking.
+              </p>
+            </div>
+            <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-mono text-slate-400">
+              <span>3 Tiers</span>
+              <span>Timed Mode</span>
+            </div>
+          </div>
+
+          {/* Module 4 */}
+          <div className="bg-white p-6 rounded-2xl border border-slate-200/80 hover:border-slate-300 transition-colors shadow-2xs flex flex-col justify-between">
+            <div>
+              <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-indigo-600 mb-4">
+                <FileText className="w-5 h-5" />
+              </div>
+              <h3 className="text-sm font-semibold text-slate-900 mb-1.5">
+                ATS Resume Intelligence
+              </h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Extracts missing technical keywords against target job descriptions and rewrites weak bullets into quantified achievements.
+              </p>
+            </div>
+            <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-mono text-slate-400">
+              <span>JD Matching</span>
+              <span>Scoring 0-100</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Curriculum & Readiness Radar Breakdown */}
+      <section id="modules" className="py-16 bg-white border-y border-slate-200/70">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            <div className="lg:col-span-5">
+              <p className="text-xs font-mono font-medium text-indigo-600 uppercase tracking-wider mb-1">
+                Readiness Analytics
+              </p>
+              <h2 className="text-2xl font-semibold text-slate-900 tracking-tight">
+                Identify gaps before your campus drive begins
               </h2>
-              <p className="text-base sm:text-lg text-blue-100 mb-8 max-w-2xl mx-auto font-normal">
-                Join hundreds of engineering students who are already using PlacePrep AI to
-                crack their campus placement drives.
+              <p className="mt-3 text-xs sm:text-sm text-slate-600 leading-relaxed">
+                Most students prepare aimlessly without knowing which round they fail in. PlacePrep tracks your skill competency across 5 core pillars so you know exactly where to allocate your study hours.
               </p>
 
-              <Link
-                href={session ? "/dashboard" : "/signup"}
-                className="inline-flex items-center gap-2.5 px-8 py-4 bg-white text-indigo-600 font-bold rounded-2xl shadow-xl hover:shadow-2xl hover:scale-105 hover:bg-slate-50 transition-all duration-300 cursor-pointer"
-              >
-                <span>{session ? "Open Dashboard" : "Create Free Account"}</span>
-                <ArrowRight className="w-5 h-5" />
-              </Link>
+              <div className="mt-6 space-y-2.5">
+                <div className="flex items-center gap-2.5 text-xs text-slate-700 font-medium">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>Data Structures & Algorithms (B-Tree, DP, Graphs)</span>
+                </div>
+                <div className="flex items-center gap-2.5 text-xs text-slate-700 font-medium">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>Core Computer Science (OS, DBMS, Networks)</span>
+                </div>
+                <div className="flex items-center gap-2.5 text-xs text-slate-700 font-medium">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>Quantitative & Logical Aptitude</span>
+                </div>
+                <div className="flex items-center gap-2.5 text-xs text-slate-700 font-medium">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>STAR Behavioral & Technical HR Communication</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="lg:col-span-7">
+              <div className="bg-slate-50 rounded-2xl border border-slate-200/90 p-5 sm:p-6 shadow-2xs">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-200 text-xs">
+                  <span className="font-medium text-slate-700">Placement Competency Breakdown</span>
+                  <span className="font-mono text-indigo-600 font-semibold">Tier-1 SDE Ready (86%)</span>
+                </div>
+
+                <div className="mt-4 space-y-3.5">
+                  <div>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="text-slate-700 font-medium">Algorithms & Problem Solving</span>
+                      <span className="font-mono text-slate-600 text-[11px]">88%</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
+                      <div className="h-full bg-indigo-600 rounded-full" style={{ width: "88%" }} />
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="text-slate-700 font-medium">Operating Systems & DBMS</span>
+                      <span className="font-mono text-slate-600 text-[11px]">82%</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
+                      <div className="h-full bg-indigo-600 rounded-full" style={{ width: "82%" }} />
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="text-slate-700 font-medium">Quantitative Aptitude</span>
+                      <span className="font-mono text-slate-600 text-[11px]">90%</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
+                      <div className="h-full bg-indigo-600 rounded-full" style={{ width: "90%" }} />
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="text-slate-700 font-medium">STAR Technical Interview</span>
+                      <span className="font-mono text-slate-600 text-[11px]">84%</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
+                      <div className="h-full bg-indigo-600 rounded-full" style={{ width: "84%" }} />
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="text-slate-700 font-medium">ATS Resume Alignment</span>
+                      <span className="font-mono text-slate-600 text-[11px]">78%</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
+                      <div className="h-full bg-indigo-600 rounded-full" style={{ width: "78%" }} />
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-slate-900 py-12 text-center text-sm text-slate-400 border-t border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-white">PlacePrep AI</span>
-            <span>•</span>
-            <span>Intelligent Placement Portal</span>
+      {/* Technical Architecture Specs */}
+      <section id="architecture" className="py-16 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="p-8 rounded-2xl bg-white border border-slate-200/90 shadow-2xs">
+          <div className="max-w-xl">
+            <p className="text-xs font-mono font-medium text-indigo-600 uppercase tracking-wider mb-1">
+              Production Architecture
+            </p>
+            <h2 className="text-xl font-semibold text-slate-900 tracking-tight">
+              Built on resilient systems engineering
+            </h2>
+            <p className="mt-1.5 text-xs text-slate-600">
+              Designed as a production-grade full-stack system with decoupled persistence, multi-device layouts, and edge security.
+            </p>
           </div>
-          <p>&copy; 2026 PlacePrep AI. Built for Engineering Students.</p>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-8 pt-6 border-t border-slate-100 font-mono text-xs">
+            <div>
+              <p className="text-slate-400 text-[11px]">RUNTIME</p>
+              <p className="text-slate-900 font-semibold mt-0.5">Next.js 16 (App)</p>
+            </div>
+            <div>
+              <p className="text-slate-400 text-[11px]">AI CORE</p>
+              <p className="text-slate-900 font-semibold mt-0.5">Gemini + Cloudflare</p>
+            </div>
+            <div>
+              <p className="text-slate-400 text-[11px]">COMPILER ENGINE</p>
+              <p className="text-slate-900 font-semibold mt-0.5">g++ &amp; Polyglot Sim</p>
+            </div>
+            <div>
+              <p className="text-slate-400 text-[11px]">DATA &amp; AUTH</p>
+              <p className="text-slate-900 font-semibold mt-0.5">Prisma &amp; NextAuth</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Call to Action Bar */}
+      <section className="py-12 border-t border-slate-200/70 bg-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div>
+            <h3 className="text-base sm:text-lg font-semibold text-slate-900">
+              Begin your technical round preparation
+            </h3>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Instant access to the Copilot sandbox, aptitude assessments, and mock interviews.
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Link
+              href={session ? "/dashboard" : "/signup"}
+              className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-xs rounded-xl transition-colors shadow-2xs"
+            >
+              {session ? "Open Workspace" : "Create free account"}
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Clean Footer */}
+      <footer className="py-8 bg-slate-900 text-slate-400 text-xs border-t border-slate-800">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2 text-slate-300">
+            <span className="font-semibold text-white">PlacePrep AI</span>
+            <span>—</span>
+            <span>Campus Placement Intelligence Workspace</span>
+          </div>
+          <p className="text-slate-500 text-[11px]">
+            &copy; 2026 Shiva Ganesh Akku • Built for Engineering Students.
+          </p>
         </div>
       </footer>
     </div>
