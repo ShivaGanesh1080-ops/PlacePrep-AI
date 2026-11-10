@@ -171,35 +171,34 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 pb-16">
+    <div className="max-w-4xl mx-auto space-y-6 pb-12">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-200/80">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-3">
-            <User className="w-8 h-8 text-indigo-600" />
-            Candidate Placement Profile
+          <h1 className="text-xl font-semibold text-slate-900 tracking-tight">
+            Candidate Profile
           </h1>
-          <p className="text-slate-600 mt-1">
-            Keep your profile updated. Our AI placement model matches this directly to eligible company roles.
+          <p className="text-xs text-slate-500 mt-0.5">
+            Academic standing, core technical skills, and portfolio credentials.
           </p>
         </div>
 
         <button
           onClick={handleSave}
           disabled={saving}
-          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl font-semibold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 shadow-md shadow-indigo-100 transition shrink-0"
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg font-medium text-xs text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 shadow-2xs transition-colors shrink-0 cursor-pointer self-start sm:self-auto"
         >
           {saving ? (
             <>
-              <Loader2 className="w-4 h-4 animate-spin" /> Saving...
+              <Loader2 className="w-3.5 h-3.5 animate-spin" /> <span>Saving...</span>
             </>
           ) : savedSuccess ? (
             <>
-              <CheckCircle className="w-4 h-4 text-emerald-300" /> Saved!
+              <CheckCircle className="w-3.5 h-3.5 text-emerald-300" /> <span>Profile saved</span>
             </>
           ) : (
             <>
-              <Save className="w-4 h-4" /> Save Profile
+              <Save className="w-3.5 h-3.5" /> <span>Save changes</span>
             </>
           )}
         </button>

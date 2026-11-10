@@ -222,16 +222,17 @@ export default function InterviewPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8">
+    <div className="max-w-6xl mx-auto space-y-6 pb-12">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-          <MessageSquare className="w-8 h-8 text-indigo-600" />
-          AI Mock Interview
-        </h1>
-        <p className="text-slate-600 mt-2">
-          Practice interviews with our AI interviewer and get instant feedback.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-slate-200/80">
+        <div>
+          <h1 className="text-xl font-semibold text-slate-900 tracking-tight">
+            STAR Mock Interview
+          </h1>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Simulate technical and behavioral recruitment rounds evaluated across Situation, Task, Action, and Result.
+          </p>
+        </div>
       </div>
 
       {/* Feedback Modal */}

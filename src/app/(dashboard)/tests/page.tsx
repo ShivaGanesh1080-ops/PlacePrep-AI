@@ -57,42 +57,42 @@ const categories: CategoryInfo[] = [
   {
     slug: "QUANTITATIVE",
     name: "Quantitative Aptitude",
-    description: "Number series, percentages, algebra, and more",
-    icon: <Calculator className="w-7 h-7" />,
-    color: "text-blue-600",
-    bgColor: "bg-blue-50",
-    borderColor: "border-blue-200 hover:border-blue-400",
-    iconBg: "bg-blue-100",
+    description: "Number series, percentages, algebra, arithmetic, and word problems",
+    icon: <Calculator className="w-5 h-5 text-indigo-600" />,
+    color: "text-slate-900",
+    bgColor: "bg-white",
+    borderColor: "border-slate-200/80 hover:border-slate-300",
+    iconBg: "bg-slate-100",
   },
   {
     slug: "VERBAL",
     name: "Verbal Ability",
-    description: "Reading comprehension, grammar, vocabulary",
-    icon: <BookOpen className="w-7 h-7" />,
-    color: "text-emerald-600",
-    bgColor: "bg-emerald-50",
-    borderColor: "border-emerald-200 hover:border-emerald-400",
-    iconBg: "bg-emerald-100",
+    description: "Reading comprehension, grammar, vocabulary, and sentence correction",
+    icon: <BookOpen className="w-5 h-5 text-indigo-600" />,
+    color: "text-slate-900",
+    bgColor: "bg-white",
+    borderColor: "border-slate-200/80 hover:border-slate-300",
+    iconBg: "bg-slate-100",
   },
   {
     slug: "LOGICAL",
     name: "Logical Reasoning",
-    description: "Patterns, sequences, and logical deductions",
-    icon: <Puzzle className="w-7 h-7" />,
-    color: "text-purple-600",
-    bgColor: "bg-purple-50",
-    borderColor: "border-purple-200 hover:border-purple-400",
-    iconBg: "bg-purple-100",
+    description: "Patterns, deduction, blood relations, syllogisms, and sequencing",
+    icon: <Puzzle className="w-5 h-5 text-indigo-600" />,
+    color: "text-slate-900",
+    bgColor: "bg-white",
+    borderColor: "border-slate-200/80 hover:border-slate-300",
+    iconBg: "bg-slate-100",
   },
   {
     slug: "TECHNICAL",
-    name: "Technical (CS)",
-    description: "Data structures, algorithms, OS, DBMS, networking",
-    icon: <Code className="w-7 h-7" />,
-    color: "text-amber-600",
-    bgColor: "bg-amber-50",
-    borderColor: "border-amber-200 hover:border-amber-400",
-    iconBg: "bg-amber-100",
+    name: "Technical (Core CS)",
+    description: "Data structures, algorithms, operating systems, DBMS, and computer networks",
+    icon: <Code className="w-5 h-5 text-indigo-600" />,
+    color: "text-slate-900",
+    bgColor: "bg-white",
+    borderColor: "border-slate-200/80 hover:border-slate-300",
+    iconBg: "bg-slate-100",
   },
 ];
 
@@ -163,42 +163,42 @@ export default function TestsPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 pb-16">
+    <div className="max-w-6xl mx-auto space-y-6 pb-12">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-200/80">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Aptitude Tests</h1>
-          <p className="text-slate-600 mt-1">
-            Practice timed placement aptitude rounds, calibrate your score, or generate fresh test papers on demand with Prep AI.
+          <h1 className="text-xl font-semibold text-slate-900 tracking-tight">Aptitude Assessments</h1>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Timed placement rounds across 4 core domains, score calibration, and custom topic synthesis.
           </p>
         </div>
 
         <button
           onClick={() => setShowGenerator(!showGenerator)}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-semibold text-xs hover:from-indigo-700 hover:to-blue-700 shadow-md shadow-indigo-100 transition self-start"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-xs transition-colors shadow-2xs self-start"
         >
-          <Sparkles className="w-4 h-4" />
-          {showGenerator ? "Hide Generator" : "Generate Custom Test with AI"}
+          <Bot className="w-3.5 h-3.5" />
+          <span>{showGenerator ? "Hide Synthesizer" : "Synthesize Custom Test"}</span>
         </button>
       </div>
 
       {/* AI Test Generator Banner / Form */}
       {showGenerator && (
-        <div className="bg-gradient-to-r from-indigo-900 via-indigo-800 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl shadow-indigo-950/20 border border-indigo-700">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-indigo-500/30 text-indigo-200 border border-indigo-400/30 flex items-center gap-1.5">
-              <Bot className="w-3.5 h-3.5 text-indigo-300" /> Powered by Prep AI Engine
+        <div className="bg-slate-900 text-white rounded-xl p-5 shadow-sm border border-slate-800">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="px-2 py-0.5 rounded text-[10px] font-mono text-indigo-400 bg-indigo-950/70 border border-indigo-800">
+              On-Demand Generator
             </span>
           </div>
 
-          <h2 className="text-xl sm:text-2xl font-bold">On-Demand Placement Test Synthesizer</h2>
-          <p className="text-indigo-200 text-xs mt-1 max-w-2xl leading-relaxed">
-            Need to practice a specific topic like <em>Dynamic Programming</em>, <em>PostgreSQL Indexing</em>, <em>React Hooks</em>, or <em>Operating System Memory Paging</em>? Type the topic below and Prep AI will generate a brand new set of verified MCQs.
+          <h2 className="text-base font-semibold text-slate-100">Topic-Specific MCQ Synthesizer</h2>
+          <p className="text-slate-400 text-xs mt-1 max-w-2xl leading-relaxed">
+            Practice targeted topics like <em>Dynamic Programming</em>, <em>OS Memory Paging</em>, or <em>Probability</em>. Generates verified questions with rationales.
           </p>
 
-          <form onSubmit={handleGenerateTest} className="mt-6 grid grid-cols-1 sm:grid-cols-12 gap-4">
+          <form onSubmit={handleGenerateTest} className="mt-4 grid grid-cols-1 sm:grid-cols-12 gap-3">
             <div className="sm:col-span-6">
-              <label className="block text-xs font-semibold text-indigo-200 mb-1">
+              <label className="block text-xs font-medium text-slate-300 mb-1">
                 Topic or Concept
               </label>
               <input
@@ -206,19 +206,19 @@ export default function TestsPage() {
                 required
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
-                placeholder="e.g. Binary Search Trees, SQL Transactions, Probability..."
-                className="w-full text-xs p-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-indigo-300/60 focus:bg-white/20 focus:outline-none focus:ring-2 focus:ring-indigo-400 font-medium"
+                placeholder="e.g. Binary Search Trees, Probability..."
+                className="w-full text-xs px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-medium"
               />
             </div>
 
             <div className="sm:col-span-3">
-              <label className="block text-xs font-semibold text-indigo-200 mb-1">
+              <label className="block text-xs font-medium text-slate-300 mb-1">
                 Difficulty
               </label>
               <select
                 value={difficulty}
                 onChange={(e) => setDifficulty(e.target.value)}
-                className="w-full text-xs p-3 rounded-xl bg-slate-800 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 font-medium"
+                className="w-full text-xs px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 font-medium"
               >
                 <option value="EASY">Easy</option>
                 <option value="MEDIUM">Medium</option>
@@ -230,15 +230,15 @@ export default function TestsPage() {
               <button
                 type="submit"
                 disabled={generating || !topic.trim()}
-                className="w-full py-3 px-5 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-bold text-xs shadow-lg disabled:opacity-50 transition flex items-center justify-center gap-2"
+                className="w-full py-2 px-4 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-xs shadow-2xs disabled:opacity-50 transition flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 {generating ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" /> Synthesizing...
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" /> <span>Synthesizing...</span>
                   </>
                 ) : (
                   <>
-                    <Zap className="w-4 h-4" /> Generate {count} MCQs
+                    <Zap className="w-3.5 h-3.5" /> <span>Generate {count} MCQs</span>
                   </>
                 )}
               </button>

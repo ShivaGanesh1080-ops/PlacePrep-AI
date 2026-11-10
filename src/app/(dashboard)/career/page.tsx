@@ -222,29 +222,30 @@ export default function CareerPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 pb-16">
+    <div className="max-w-6xl mx-auto space-y-6 pb-12">
       {/* Page Header */}
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-3">
-          <Brain className="w-8 h-8 text-indigo-600" />
-          AI Career Pathway Recommendation
-        </h1>
-        <p className="text-slate-600 mt-1">
-          Ollama analyzes your engineering branch, CGPA, and technical skillset to map your optimal placement trajectories.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-slate-200/80">
+        <div>
+          <h1 className="text-xl font-semibold text-slate-900 tracking-tight">
+            Career Pathways
+          </h1>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Evaluate engineering branch, CGPA, and technical skillset to benchmark target recruitment tracks.
+          </p>
+        </div>
       </div>
 
       {/* Main Grid: Form on Left, Results on Right */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Form Column */}
-        <div className="lg:col-span-5 space-y-6">
-          <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-5">
-            <h2 className="text-base font-bold text-slate-900 border-b border-slate-100 pb-3">
+        <div className="lg:col-span-5 space-y-4">
+          <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-2xs space-y-4">
+            <h2 className="text-xs font-semibold text-slate-900 border-b border-slate-100 pb-2.5">
               Candidate Profile Inputs
             </h2>
 
             {formError && (
-              <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold flex items-center gap-2">
+              <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4 shrink-0" />
                 <span>{formError}</span>
               </div>

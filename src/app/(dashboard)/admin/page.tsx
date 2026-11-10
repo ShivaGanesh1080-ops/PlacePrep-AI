@@ -87,29 +87,28 @@ export default function AdminDashboardPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 pb-16">
+    <div className="max-w-6xl mx-auto space-y-6 pb-12">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-200/80">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-3">
-            <Settings className="w-8 h-8 text-indigo-600" />
-            Placement Cell Administration
+          <h1 className="text-xl font-semibold text-slate-900 tracking-tight">
+            Placement Administration
           </h1>
-          <p className="text-slate-600 mt-1">
-            Manage question banks, campus recruitment listings, and student performance metrics.
+          <p className="text-xs text-slate-500 mt-0.5">
+            Question bank curation, recruitment drive management, and cohort performance analytics.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <Link
             href="/admin/questions"
-            className="px-4 py-2.5 rounded-xl bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 shadow-sm transition"
+            className="px-3.5 py-2 rounded-lg bg-indigo-600 text-white text-xs font-medium hover:bg-indigo-700 shadow-2xs transition-colors"
           >
-            Manage Question Bank
+            Question Bank
           </Link>
           <Link
             href="/admin/companies"
-            className="px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 text-xs font-semibold hover:bg-slate-50 shadow-sm transition"
+            className="px-3.5 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 text-xs font-medium hover:bg-slate-50 shadow-2xs transition-colors"
           >
             Manage Companies
           </Link>
@@ -117,43 +116,51 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-          <div className="flex items-center justify-between text-slate-500 mb-2">
-            <span className="text-xs font-bold uppercase tracking-wider">Registered Students</span>
-            <Users className="w-4 h-4 text-indigo-600" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+        <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-2xs">
+          <div className="flex items-center justify-between text-slate-500 mb-1">
+            <span className="text-xs font-medium text-slate-600">Registered candidates</span>
+            <Users className="w-4 h-4 text-slate-400" />
           </div>
-          <div className="text-2xl font-black text-slate-900">{stats?.totalStudents || 0}</div>
-          <span className="text-[11px] font-medium text-slate-500 mt-1 block">Active platform candidates</span>
+          <div className="text-2xl font-semibold font-mono tabular-nums text-slate-900 mt-1">
+            {stats?.totalStudents || 0}
+          </div>
+          <span className="text-[11px] text-slate-400 mt-1 block">Active student accounts</span>
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-          <div className="flex items-center justify-between text-slate-500 mb-2">
-            <span className="text-xs font-bold uppercase tracking-wider">Aptitude Tests Taken</span>
-            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+        <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-2xs">
+          <div className="flex items-center justify-between text-slate-500 mb-1">
+            <span className="text-xs font-medium text-slate-600">Assessments evaluated</span>
+            <CheckCircle2 className="w-4 h-4 text-slate-400" />
           </div>
-          <div className="text-2xl font-black text-slate-900">{stats?.totalTestsTaken || 0}</div>
-          <span className="text-[11px] font-medium text-emerald-600 mt-1 block">
-            Avg Score: {stats?.averageScore || 0}%
+          <div className="text-2xl font-semibold font-mono tabular-nums text-slate-900 mt-1">
+            {stats?.totalTestsTaken || 0}
+          </div>
+          <span className="text-[11px] text-slate-400 mt-1 block">
+            Avg accuracy: {stats?.averageScore || 0}%
           </span>
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-          <div className="flex items-center justify-between text-slate-500 mb-2">
-            <span className="text-xs font-bold uppercase tracking-wider">Partner Companies</span>
-            <Building2 className="w-4 h-4 text-blue-600" />
+        <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-2xs">
+          <div className="flex items-center justify-between text-slate-500 mb-1">
+            <span className="text-xs font-medium text-slate-600">Active campus drives</span>
+            <Building2 className="w-4 h-4 text-slate-400" />
           </div>
-          <div className="text-2xl font-black text-slate-900">{stats?.totalCompaniesListed || 0}</div>
-          <span className="text-[11px] font-medium text-blue-600 mt-1 block">Active drive listings</span>
+          <div className="text-2xl font-semibold font-mono tabular-nums text-slate-900 mt-1">
+            {stats?.totalCompaniesListed || 0}
+          </div>
+          <span className="text-[11px] text-slate-400 mt-1 block">Listed recruitment drives</span>
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-          <div className="flex items-center justify-between text-slate-500 mb-2">
-            <span className="text-xs font-bold uppercase tracking-wider">Question Bank</span>
-            <HelpCircle className="w-4 h-4 text-purple-600" />
+        <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-2xs">
+          <div className="flex items-center justify-between text-slate-500 mb-1">
+            <span className="text-xs font-medium text-slate-600">Question repository</span>
+            <HelpCircle className="w-4 h-4 text-slate-400" />
           </div>
-          <div className="text-2xl font-black text-slate-900">{stats?.totalQuestions || 0}</div>
-          <span className="text-[11px] font-medium text-purple-600 mt-1 block">Curated placement MCQs</span>
+          <div className="text-2xl font-semibold font-mono tabular-nums text-slate-900 mt-1">
+            {stats?.totalQuestions || 0}
+          </div>
+          <span className="text-[11px] text-slate-400 mt-1 block">Curated placement MCQs</span>
         </div>
       </div>
 

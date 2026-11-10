@@ -32,7 +32,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Prep AI", href: "/copilot", icon: Bot },
-  { label: "Career AI", href: "/career", icon: Brain },
+  { label: "Career Pathways", href: "/career", icon: Brain },
   { label: "Aptitude Tests", href: "/tests", icon: ClipboardCheck },
   { label: "Mock Interview", href: "/interview", icon: MessageSquare },
   { label: "Resume Intelligence", href: "/resume", icon: FileText },
@@ -48,7 +48,6 @@ export default function DashboardLayout({
 }) {
   const { data: session } = useSession();
   const pathname = usePathname();
-  // Sidebar expanded (true = full width w-64, false = Antigravity slim activity rail w-[68px])
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
@@ -65,6 +64,10 @@ export default function DashboardLayout({
     return pathname.startsWith(href);
   }
 
+  // Derive current page context name from pathname for quiet header
+  const currentNav = filteredNavItems.find((item) => isActive(item.href));
+  const pageTitle = currentNav?.label || "Workspace";
+
   return (
     <div className="min-h-screen bg-slate-50 flex">
       {/* Mobile Drawer Backdrop */}
@@ -75,50 +78,51 @@ export default function DashboardLayout({
         />
       )}
 
-      {/* Antigravity-Style Collapsible Sidebar (Desktop: Expanded w-64 vs Slim Activity Rail w-[68px]) */}
+      {/* Antigravity-Style Collapsible Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 bg-white border-r border-slate-200/90 flex flex-col transition-all duration-300 ease-in-out shadow-xs ${
-          // Desktop sizing:
+        className={`fixed inset-y-0 left-0 z-50 bg-white border-r border-slate-200/80 flex flex-col transition-all duration-300 ease-in-out ${
           sidebarOpen ? "lg:w-64" : "lg:w-[68px]"
         } ${
-          // Mobile drawer sizing:
           mobileDrawerOpen
-            ? "translate-x-0 w-64"
+            ? "translate-x-0 w-64 shadow-xl"
             : "-translate-x-full lg:translate-x-0"
         }`}
       >
         {/* Sidebar Header */}
-        <div className="h-15 border-b border-slate-100 flex items-center justify-between px-3.5">
-          {/* Logo & Brand Name */}
+        <div className="h-14 border-b border-slate-100 flex items-center justify-between px-3.5">
           <Link
             href="/dashboard"
             className={`flex items-center gap-2.5 overflow-hidden transition-all ${
               !sidebarOpen ? "lg:justify-center lg:w-full" : ""
             }`}
           >
-            <div className="w-8 h-8 bg-gradient-to-br from-indigo-600 to-blue-500 rounded-xl flex items-center justify-center shadow-xs shrink-0">
-              <GraduationCap className="w-4.5 h-4.5 text-white" />
+            <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center text-white shrink-0">
+              <GraduationCap className="w-4 h-4" />
             </div>
 
-            {/* Title visible only when expanded or on mobile drawer */}
-            <span
-              className={`text-base font-bold bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent tracking-tight whitespace-nowrap transition-opacity duration-200 ${
+            <div
+              className={`flex items-baseline gap-1.5 transition-opacity duration-200 ${
                 !sidebarOpen ? "lg:hidden" : "block"
               }`}
             >
-              PlacePrep AI
-            </span>
+              <span className="text-xs font-semibold tracking-tight text-slate-900">
+                PlacePrep
+              </span>
+              <span className="text-[10px] font-mono font-medium text-slate-400">
+                AI
+              </span>
+            </div>
           </Link>
 
-          {/* Desktop Toggle Button (Only 1 clean toggle button inside the sidebar!) */}
+          {/* Desktop Toggle Button */}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className={`hidden lg:flex p-1.5 rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer shrink-0 ${
+            className={`hidden lg:flex p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer shrink-0 ${
               !sidebarOpen ? "hidden" : "flex"
             }`}
             title="Collapse sidebar to activity rail"
           >
-            <PanelLeftClose className="w-4 h-4" />
+            <PanelLeftClose className="w-3.5 h-3.5" />
           </button>
 
           {/* Mobile Close Button */}
@@ -133,19 +137,19 @@ export default function DashboardLayout({
 
         {/* When collapsed on desktop: Dedicated expand button at top of slim rail */}
         {!sidebarOpen && (
-          <div className="hidden lg:flex justify-center py-2.5 border-b border-slate-100">
+          <div className="hidden lg:flex justify-center py-2 border-b border-slate-100">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="p-2 rounded-xl text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 transition-colors cursor-pointer"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
               title="Expand sidebar"
             >
-              <PanelLeftOpen className="w-4.5 h-4.5" />
+              <PanelLeftOpen className="w-4 h-4" />
             </button>
           </div>
         )}
 
-        {/* Navigation Items (Antigravity Activity Rail style) */}
-        <nav className="flex-1 px-2.5 py-3 space-y-1 overflow-y-auto overflow-x-hidden">
+        {/* Navigation Items */}
+        <nav className="flex-1 px-2.5 py-3 space-y-0.5 overflow-y-auto overflow-x-hidden">
           {filteredNavItems.map((item) => {
             const active = isActive(item.href);
             return (
@@ -153,30 +157,28 @@ export default function DashboardLayout({
                 <Link
                   href={item.href}
                   onClick={() => setMobileDrawerOpen(false)}
-                  className={`flex items-center rounded-xl text-xs font-semibold transition-all duration-200 ${
+                  className={`flex items-center rounded-lg text-xs font-medium transition-colors ${
                     sidebarOpen
-                      ? "px-3 py-2.5 gap-3"
-                      : "lg:justify-center lg:px-0 lg:py-2.5 px-3 py-2.5 gap-3"
+                      ? "px-2.5 py-2 gap-2.5"
+                      : "lg:justify-center lg:px-0 lg:py-2 px-2.5 py-2 gap-2.5"
                   } ${
                     active
-                      ? "bg-indigo-50 text-indigo-700 font-bold border border-indigo-100 shadow-xs"
-                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-transparent"
+                      ? "bg-slate-100 text-slate-900 font-semibold"
+                      : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                   }`}
                 >
                   {/* Left Active Glow Pill on Slim Rail */}
                   {!sidebarOpen && active && (
-                    <span className="hidden lg:block absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-indigo-600 rounded-r-full" />
+                    <span className="hidden lg:block absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-indigo-600 rounded-r-full" />
                   )}
 
                   <item.icon
-                    className={`w-4.5 h-4.5 shrink-0 transition-transform group-hover:scale-105 ${
-                      active
-                        ? "text-indigo-600"
-                        : "text-slate-400 group-hover:text-slate-700"
+                    className={`w-4 h-4 shrink-0 ${
+                      active ? "text-indigo-600" : "text-slate-400 group-hover:text-slate-600"
                     }`}
                   />
 
-                  {/* Label (hidden in slim mode on desktop) */}
+                  {/* Label */}
                   <span
                     className={`flex-1 truncate transition-opacity duration-200 ${
                       !sidebarOpen ? "lg:hidden" : "block"
@@ -186,15 +188,15 @@ export default function DashboardLayout({
                   </span>
 
                   {sidebarOpen && active && (
-                    <ChevronRight className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 shrink-0" />
                   )}
                 </Link>
 
-                {/* Sleek Floating Tooltip (Visible ONLY on desktop in slim mode) */}
+                {/* Sleek Floating Tooltip */}
                 {!sidebarOpen && (
-                  <div className="hidden lg:group-hover:flex items-center absolute left-full top-1/2 -translate-y-1/2 ml-3 z-50 pointer-events-none animate-in fade-in slide-in-from-left-2 duration-150">
-                    <div className="px-2.5 py-1 bg-slate-900 text-white text-xs font-medium rounded-lg shadow-xl whitespace-nowrap flex items-center gap-1.5 border border-slate-800">
-                      <span>{item.label}</span>
+                  <div className="hidden lg:group-hover:flex items-center absolute left-full top-1/2 -translate-y-1/2 ml-2.5 z-50 pointer-events-none animate-in fade-in duration-100">
+                    <div className="px-2 py-1 bg-slate-900 text-white text-[11px] font-medium rounded-md shadow-lg whitespace-nowrap border border-slate-800">
+                      {item.label}
                     </div>
                   </div>
                 )}
@@ -204,17 +206,17 @@ export default function DashboardLayout({
         </nav>
 
         {/* User Profile Footer */}
-        <div className="p-3 border-t border-slate-100 bg-white">
+        <div className="p-2.5 border-t border-slate-100 bg-white">
           {sidebarOpen ? (
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-blue-500 flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-xs">
+            <div className="flex items-center justify-between px-1">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-7 h-7 rounded-lg bg-slate-900 flex items-center justify-center text-white text-[11px] font-semibold shrink-0">
                   {session?.user?.name
                     ? session.user.name.charAt(0).toUpperCase()
                     : "S"}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs font-bold text-slate-800 truncate">
+                  <p className="text-xs font-medium text-slate-900 truncate">
                     {session?.user?.name || "Student"}
                   </p>
                   <p className="text-[10px] text-slate-400 truncate">
@@ -225,28 +227,21 @@ export default function DashboardLayout({
 
               <button
                 onClick={() => signOut({ callbackUrl: "/" })}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
-                title="Logout"
+                className="p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                title="Sign out"
               >
-                <LogOut className="w-4 h-4" />
+                <LogOut className="w-3.5 h-3.5" />
               </button>
             </div>
           ) : (
-            <div className="hidden lg:flex flex-col items-center gap-2 relative group">
+            <div className="hidden lg:flex flex-col items-center py-1 relative group">
               <div
-                className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-blue-500 flex items-center justify-center text-white text-xs font-bold shadow-xs cursor-pointer"
+                className="w-7 h-7 rounded-lg bg-slate-900 flex items-center justify-center text-white text-[11px] font-semibold cursor-pointer"
                 title={session?.user?.name || "User"}
               >
                 {session?.user?.name
                   ? session.user.name.charAt(0).toUpperCase()
                   : "S"}
-              </div>
-
-              {/* Tooltip on slim mode */}
-              <div className="hidden lg:group-hover:flex items-center absolute left-full top-1/2 -translate-y-1/2 ml-3 z-50 pointer-events-none animate-in fade-in duration-150">
-                <div className="px-2.5 py-1 bg-slate-900 text-white text-xs font-medium rounded-lg shadow-xl whitespace-nowrap border border-slate-800">
-                  {session?.user?.name || "Student"}
-                </div>
               </div>
             </div>
           )}
@@ -260,43 +255,37 @@ export default function DashboardLayout({
         }`}
       >
         {/* Top Header Bar */}
-        <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-xs h-15 flex items-center justify-between px-4 sm:px-6">
-          {/* Left: Mobile Drawer Trigger + Greeting */}
+        <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-xs border-b border-slate-200/80 h-14 flex items-center justify-between px-4 sm:px-6">
+          {/* Left: Context Breadcrumb */}
           <div className="flex items-center gap-3">
-            {/* Mobile-only menu toggle (Hidden on desktop!) */}
             <button
               onClick={() => setMobileDrawerOpen(true)}
-              className="lg:hidden p-2 -ml-2 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors"
+              className="lg:hidden p-1.5 -ml-1 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
               title="Open menu"
             >
-              <Menu className="w-5 h-5" />
+              <Menu className="w-4 h-4" />
             </button>
 
-            <p className="text-xs font-medium text-slate-500">
-              Welcome back,{" "}
-              <span className="font-semibold text-slate-900">
-                {session?.user?.name || "Student"}
-              </span>
-            </p>
+            <div className="flex items-center gap-1.5 text-xs">
+              <span className="text-slate-400">Workspace</span>
+              <span className="text-slate-300">/</span>
+              <span className="font-medium text-slate-900">{pageTitle}</span>
+            </div>
           </div>
 
-          {/* Right: Quick Profile Badge & Logout */}
-          <div className="flex items-center gap-2.5">
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 shadow-2xs">
-              <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-indigo-600 to-blue-500 flex items-center justify-center text-white text-xs font-bold">
-                {session?.user?.name
-                  ? session.user.name.charAt(0).toUpperCase()
-                  : "S"}
-              </div>
-              <span className="text-xs font-semibold text-slate-800 hidden sm:block">
+          {/* Right: User Badge */}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg border border-slate-200 bg-white text-xs text-slate-700">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              <span className="font-medium hidden sm:inline">
                 {session?.user?.name || "Student"}
               </span>
             </div>
 
             <button
               onClick={() => signOut({ callbackUrl: "/" })}
-              className="p-2 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 border border-transparent hover:border-red-200 transition-all cursor-pointer"
-              title="Logout"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+              title="Sign out"
             >
               <LogOut className="w-4 h-4" />
             </button>
@@ -304,7 +293,7 @@ export default function DashboardLayout({
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-6 overflow-x-hidden min-w-0">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-x-hidden min-w-0">
           {children}
         </main>
       </div>

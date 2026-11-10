@@ -121,16 +121,17 @@ export default function CompaniesPage() {
   });
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 pb-16">
+    <div className="max-w-6xl mx-auto space-y-6 pb-12">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-3">
-          <Building2 className="w-8 h-8 text-indigo-600" />
-          Campus Recruitment & Company Tracker
-        </h1>
-        <p className="text-slate-600 mt-1">
-          Explore visiting enterprise tech companies, view eligibility cutoffs, and monitor your application journey.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-slate-200/80">
+        <div>
+          <h1 className="text-xl font-semibold text-slate-900 tracking-tight">
+            Campus Recruitment Drives
+          </h1>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Active campus drives, eligibility cutoffs, and recruitment pipeline status.
+          </p>
+        </div>
       </div>
 
       {/* Filter toolbar */}
