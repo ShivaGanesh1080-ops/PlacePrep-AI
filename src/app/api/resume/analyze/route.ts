@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { generateAIResponse } from "@/lib/gemini";
+import { extractDocumentText, analyzeResumeDeep } from "@/lib/resume-analyzer";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +16,7 @@ export async function GET() {
     const analyses = await prisma.resumeAnalysis.findMany({
       where: { userId: session.user.id },
       orderBy: { createdAt: "desc" },
-      take: 5,
+      take: 6,
     });
 
     return NextResponse.json(analyses);
@@ -33,88 +33,69 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { resumeText } = await req.json();
-    if (!resumeText || resumeText.trim().length < 50) {
+    const body = await req.json();
+    const { resumeText, fileData, targetRole } = body;
+
+    let textToAnalyze = "";
+    let parsedFrom: "pdf" | "docx" | "image" | "text" = "text";
+    let fileName = fileData?.fileName || "resume.txt";
+
+    if (fileData && fileData.base64) {
+      const rawBase64 = fileData.base64.includes(",")
+        ? fileData.base64.split(",")[1]
+        : fileData.base64;
+      const buffer = Buffer.from(rawBase64, "base64");
+      const extraction = await extractDocumentText(
+        buffer,
+        fileData.mimeType || "",
+        fileData.fileName || ""
+      );
+      textToAnalyze = extraction.text;
+      parsedFrom = extraction.parsedFrom;
+      fileName = fileData.fileName || fileName;
+    } else if (resumeText && typeof resumeText === "string" && resumeText.trim().length > 0) {
+      textToAnalyze = resumeText.trim();
+      parsedFrom = "text";
+    }
+
+    if (!textToAnalyze || textToAnalyze.trim().length < 30) {
       return NextResponse.json(
-        { error: "Resume text must be at least 50 characters." },
+        {
+          error:
+            "Could not extract sufficient text from your resume. Please check that the file is not empty or password-protected, or paste your plain-text resume directly.",
+        },
         { status: 400 }
       );
     }
 
-    const prompt = `You are a Tier-1 Tech Company Campus Recruiter and ATS (Applicant Tracking System) Specialist.
-Analyze the following student resume for software engineering and placement roles:
+    const analysis = await analyzeResumeDeep(textToAnalyze, targetRole, parsedFrom);
 
-Resume:
-${resumeText}
-
-Analyze every critical section. You MUST return ONLY a valid raw JSON object strictly adhering to this schema:
-{
-  "score": 85,
-  "atsScore": 88,
-  "summary": "High-level summary of the resume's competitiveness and ATS readiness.",
-  "sections": {
-    "contact": { "score": 90, "feedback": "Contains clear contact links and GitHub profile." },
-    "education": { "score": 95, "feedback": "Clearly demonstrates high CGPA and relevant CSE coursework." },
-    "experience": { "score": 80, "feedback": "Good internship points, quantify impact metrics further." },
-    "skills": { "score": 88, "feedback": "Well-categorized and relevant technical stack." },
-    "projects": { "score": 86, "feedback": "High engineering complexity shown; emphasize architectural decisions." },
-    "formatting": { "score": 85, "feedback": "Concise plain-text structure suitable for ATS parsing." }
-  },
-  "improvements": [
-    "Quantify metrics on project throughput and latency reduction",
-    "List specific libraries or testing frameworks used (e.g., Jest, PyTest)",
-    "Include production deployment details"
-  ]
-}
-No markdown backticks, just raw JSON.`;
-
-    const aiResponse = await generateAIResponse(prompt);
-
-    let parsed = {
-      score: 82,
-      atsScore: 85,
-      summary: "Resume demonstrates strong technical foundations and relevant computer science projects.",
-      sections: {
-        contact: { score: 90, feedback: "Professional details provided clearly." },
-        education: { score: 90, feedback: "Academic background is well-articulated." },
-        experience: { score: 75, feedback: "Expand on measurable impacts with percentages or benchmarks." },
-        skills: { score: 85, feedback: "Modern and relevant tech stack." },
-        projects: { score: 82, feedback: "Solid projects; add deployment and hosting links." },
-        formatting: { score: 80, feedback: "Clean layout, parseable across standard ATS platforms." },
-      },
-      improvements: [
-        "Include measurable impact numbers (e.g. latency, user metrics, scale)",
-        "Highlight automated testing and CI/CD pipelines in projects",
-        "Add direct links to hosted demos or repository code",
-      ],
-    };
-
-    try {
-      const cleanJson = aiResponse.replace(/```json/g, "").replace(/```/g, "").trim();
-      parsed = JSON.parse(cleanJson);
-    } catch (e) {
-      console.warn("Falling back to structured defaults due to JSON parse error:", e);
-    }
-
+    // Save to Database
     await prisma.resumeAnalysis.create({
       data: {
         userId: session.user.id,
-        resumeText,
-        score: parsed.score || 80,
-        feedback: JSON.stringify(parsed),
+        resumeText: textToAnalyze.slice(0, 10000),
+        score: analysis.score,
+        feedback: JSON.stringify(analysis),
       },
     });
 
-    // Also update student profile with latest resume text
+    // Update Student Profile with the latest resume text
     await prisma.studentProfile.upsert({
       where: { userId: session.user.id },
-      update: { resumeText },
-      create: { userId: session.user.id, resumeText },
+      update: { resumeText: textToAnalyze.slice(0, 5000) },
+      create: { userId: session.user.id, resumeText: textToAnalyze.slice(0, 5000) },
     });
 
-    return NextResponse.json(parsed);
+    return NextResponse.json({
+      ...analysis,
+      fileName,
+    });
   } catch (error) {
     console.error("Resume analysis failed:", error);
-    return NextResponse.json({ error: "Failed to analyze resume" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to analyze resume. Please try again." },
+      { status: 500 }
+    );
   }
 }

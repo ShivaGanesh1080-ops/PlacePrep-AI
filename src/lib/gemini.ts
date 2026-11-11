@@ -1,11 +1,21 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const OLLAMA_HOST = process.env.OLLAMA_HOST || "http://127.0.0.1:11434";
-const OLLAMA_MODEL = process.env.OLLAMA_MODEL || "gemma2:2b";
-const GROQ_API_KEY = process.env.GROQ_API_KEY || "";
-const CLOUDFLARE_ACCOUNT_ID = process.env.CLOUDFLARE_ACCOUNT_ID || "";
-const CLOUDFLARE_API_TOKEN = process.env.CLOUDFLARE_API_TOKEN || "";
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+function cleanEnv(val: string | undefined): string {
+  if (!val) return "";
+  let v = val.trim();
+  if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'"))) {
+    v = v.slice(1, -1);
+  }
+  return v.trim();
+}
+
+const OLLAMA_HOST = cleanEnv(process.env.OLLAMA_HOST) || "http://127.0.0.1:11434";
+const OLLAMA_MODEL = cleanEnv(process.env.OLLAMA_MODEL) || "gemma2:2b";
+const GROQ_API_KEY = cleanEnv(process.env.GROQ_API_KEY);
+const CLOUDFLARE_ACCOUNT_ID = cleanEnv(process.env.CLOUDFLARE_ACCOUNT_ID);
+const CLOUDFLARE_API_TOKEN = cleanEnv(process.env.CLOUDFLARE_API_TOKEN);
+const GEMINI_API_KEY = cleanEnv(process.env.GEMINI_API_KEY);
+const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
 /**
  * Safely extracts text or JSON string from Cloudflare Workers AI response
@@ -13,9 +23,18 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function extractCloudflareResponse(data: any): string | null {
   if (!data || typeof data !== "object") return null;
+  // If OpenAI-compatible format with choices
+  if (data.result?.choices?.[0]?.message?.content) {
+    return data.result.choices[0].message.content.trim();
+  }
   const res = data.result?.response ?? data.result;
   if (typeof res === "string") return res.trim();
-  if (res && typeof res === "object") return JSON.stringify(res);
+  if (res && typeof res === "object") {
+    if (res.choices?.[0]?.message?.content) {
+      return res.choices[0].message.content.trim();
+    }
+    return JSON.stringify(res);
+  }
   if (res !== undefined && res !== null) return String(res).trim();
   return null;
 }
@@ -24,7 +43,7 @@ function extractCloudflareResponse(data: any): string | null {
  * Call Cloudflare Workers AI (Free tier: 10,000 neurons/day)
  * Model: @cf/meta/llama-3.1-8b-instruct
  */
-async function callCloudflareAI(prompt: string, systemPrompt?: string): Promise<string | null> {
+export async function callCloudflareAI(prompt: string, systemPrompt?: string): Promise<string | null> {
   if (!CLOUDFLARE_ACCOUNT_ID || !CLOUDFLARE_API_TOKEN) return null;
   try {
     const controller = new AbortController();
@@ -190,7 +209,7 @@ async function callOllama(prompt: string, systemPrompt?: string): Promise<string
 /**
  * Call Cloudflare Meta Llama 3.2 11B Vision for fast multimodal image/code reading
  */
-async function callCloudflareVision(
+export async function callCloudflareVision(
   prompt: string,
   imageBase64: string,
   systemPrompt?: string
@@ -239,7 +258,7 @@ async function callCloudflareVision(
 /**
  * Call Gemini 1.5 Flash Vision for Multimodal Image Analysis
  */
-async function callGeminiVision(
+export async function callGeminiVision(
   prompt: string,
   imageBase64: string,
   systemPrompt?: string
