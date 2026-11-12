@@ -21,6 +21,15 @@ import {
   PanelLeftOpen,
   Search,
   History,
+  Volume2,
+  VolumeX,
+  RefreshCw,
+  Sparkles,
+  ThumbsUp,
+  ThumbsDown,
+  Code2,
+  Terminal,
+  Cpu,
 } from "lucide-react";
 
 interface Message {
@@ -28,6 +37,60 @@ interface Message {
   content: string;
   image?: string;
 }
+
+interface ParsedMessage {
+  text: string;
+  suggestions: string[];
+}
+
+function parseMessageContent(rawContent: string): ParsedMessage {
+  const suggestionRegex = /<<<SUGGESTIONS>>>([\s\S]*?)<<<END_SUGGESTIONS>>>/;
+  const match = suggestionRegex.exec(rawContent);
+
+  if (!match) {
+    return { text: rawContent, suggestions: [] };
+  }
+
+  const cleanText = rawContent.replace(suggestionRegex, "").trim();
+  const suggestionsBlock = match[1];
+  const suggestions = suggestionsBlock
+    .split("\n")
+    .map((line) => line.replace(/^[-*•\d.]\s*/, "").trim())
+    .filter((line) => line.length > 0 && !line.startsWith("<"));
+
+  return { text: cleanText, suggestions };
+}
+
+const QUICK_START_CARDS = [
+  {
+    icon: Code2,
+    tag: "Data Structures & DSA",
+    title: "Optimal Two Sum in C++",
+    prompt: "Write an optimal Two Sum algorithm in C++ with O(n) hash map and edge case analysis",
+    desc: "Complexity analysis, hash maps, and pointer mechanics",
+  },
+  {
+    icon: Terminal,
+    tag: "Code Debugging",
+    title: "Fix Recursion Stack Overflow",
+    prompt: "Analyze this recursive tree traversal for stack overflow and rewrite it iteratively",
+    desc: "Call stack limits, recursion vs iteration, memory profiling",
+  },
+  {
+    icon: Cpu,
+    tag: "System Design & DBMS",
+    title: "B+ Tree vs Hash Indexing",
+    prompt: "Explain Database Indexing: B-Tree vs Hash vs LSM Trees with production trade-offs",
+    desc: "Storage engines, range queries, write amplification",
+  },
+  {
+    icon: Sparkles,
+    tag: "Mock HR / Behavioral",
+    title: "STAR Technique for Conflict",
+    prompt: "How to answer: 'Tell me about a time you had a technical disagreement with a teammate' using STAR format",
+    desc: "Situation, Task, Action, Result framework for FAANG/Tier-1",
+  },
+];
 
 interface Conversation {
   id: string;
@@ -80,6 +143,8 @@ export default function CopilotPage() {
   const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
   const [attachedImage, setAttachedImage] = useState<string | null>(null);
   const [expandedImage, setExpandedImage] = useState<string | null>(null);
+  const [speakingIdx, setSpeakingIdx] = useState<number | null>(null);
+  const [feedbackState, setFeedbackState] = useState<Record<number, "up" | "down">>({});
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -331,6 +396,53 @@ export default function CopilotPage() {
     navigator.clipboard.writeText(text);
     setCopiedIdx(idx);
     setTimeout(() => setCopiedIdx(null), 2000);
+  }
+
+  function handleSpeak(text: string, idx: number) {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+      alert("Text-to-speech is not supported in this browser.");
+      return;
+    }
+
+    if (speakingIdx === idx) {
+      window.speechSynthesis.cancel();
+      setSpeakingIdx(null);
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+    // Clean text: strip markdown code blocks and symbols for natural pronunciation
+    const speechText = text
+      .replace(/```[\s\S]*?```/g, "Code block omitted.")
+      .replace(/[*#_`>]/g, "")
+      .trim();
+
+    const utterance = new SpeechSynthesisUtterance(speechText);
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+    utterance.onend = () => setSpeakingIdx(null);
+    utterance.onerror = () => setSpeakingIdx(null);
+
+    setSpeakingIdx(idx);
+    window.speechSynthesis.speak(utterance);
+  }
+
+  function handleRegenerate() {
+    if (loading) return;
+    const lastUserMsg = [...messages].reverse().find((m) => m.role === "user");
+    if (!lastUserMsg) return;
+
+    if (messages[messages.length - 1].role === "assistant") {
+      setMessages((prev) => prev.slice(0, -1));
+    }
+    handleSend(lastUserMsg.content);
+  }
+
+  function handleFeedback(idx: number, type: "up" | "down") {
+    setFeedbackState((prev) => ({
+      ...prev,
+      [idx]: prev[idx] === type ? undefined! : type,
+    }));
   }
 
   function renderMessageContent(content: string) {
@@ -640,80 +752,216 @@ export default function CopilotPage() {
             </div>
           ) : (
             <>
-              {messages.map((msg, idx) => (
-                <div
-                  key={idx}
-                  className={`flex gap-2 sm:gap-3 ${
-                    msg.role === "user" ? "justify-end" : "justify-start"
-                  }`}
-                >
-                  {msg.role === "assistant" && (
-                    <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg sm:rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-500 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
-                      <Bot className="w-3.5 h-3.5" />
-                    </div>
-                  )}
+              {messages.map((msg, idx) => {
+                const parsed = msg.role === "assistant" ? parseMessageContent(msg.content) : null;
+                const isLatestAssistant =
+                  msg.role === "assistant" &&
+                  (idx === messages.length - 1 ||
+                    (idx === messages.length - 2 && messages[messages.length - 1].role === "user"));
 
+                return (
                   <div
-                    className={`relative group max-w-[90%] sm:max-w-[82%] rounded-2xl px-3.5 py-2.5 sm:px-4 sm:py-3 shadow-xs ${
-                      msg.role === "user"
-                        ? "bg-indigo-600 text-white rounded-tr-xs"
-                        : "bg-slate-50 text-slate-800 border border-slate-200/80 rounded-tl-xs"
+                    key={idx}
+                    className={`flex flex-col ${
+                      msg.role === "user" ? "items-end" : "items-start"
                     }`}
                   >
-                    {/* Attached Image Preview */}
-                    {msg.image && (
-                      <div className="mb-2">
-                        <div
-                          className="relative inline-block cursor-pointer overflow-hidden rounded-xl border border-white/20 group/img"
-                          onClick={() => setExpandedImage(msg.image || null)}
-                          title="Click to zoom image"
-                        >
-                          <img
-                            src={msg.image}
-                            alt="Attached Problem Statement"
-                            className="max-h-48 sm:max-h-56 max-w-full rounded-xl object-cover hover:scale-102 transition-transform duration-200"
-                          />
-                          <div className="absolute inset-0 bg-black/30 opacity-0 group-hover/img:opacity-100 flex items-center justify-center transition-opacity">
-                            <span className="text-[11px] font-bold text-white bg-black/60 px-2.5 py-1 rounded-full flex items-center gap-1">
-                              <ImageIcon className="w-3 h-3" /> Zoom
-                            </span>
-                          </div>
+                    <div
+                      className={`flex gap-2 sm:gap-3 w-full ${
+                        msg.role === "user" ? "justify-end" : "justify-start"
+                      }`}
+                    >
+                      {msg.role === "assistant" && (
+                        <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg sm:rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-500 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
+                          <Bot className="w-3.5 h-3.5" />
                         </div>
-                      </div>
-                    )}
+                      )}
 
-                    {/* Copy Button */}
-                    {msg.role === "assistant" && (
-                      <button
-                        onClick={() => handleCopy(msg.content, idx)}
-                        className="absolute top-2 right-2 p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 opacity-0 group-hover:opacity-100 transition-opacity"
-                        title="Copy message"
+                      <div
+                        className={`relative group max-w-[90%] sm:max-w-[85%] rounded-2xl px-3.5 py-2.5 sm:px-4 sm:py-3 shadow-xs ${
+                          msg.role === "user"
+                            ? "bg-indigo-600 text-white rounded-tr-xs"
+                            : "bg-slate-50 text-slate-800 border border-slate-200/80 rounded-tl-xs"
+                        }`}
                       >
-                        {copiedIdx === idx ? (
-                          <Check className="w-3.5 h-3.5 text-emerald-600" />
-                        ) : (
-                          <Copy className="w-3.5 h-3.5" />
+                        {/* Attached Image Preview */}
+                        {msg.image && (
+                          <div className="mb-2">
+                            <div
+                              className="relative inline-block cursor-pointer overflow-hidden rounded-xl border border-white/20 group/img"
+                              onClick={() => setExpandedImage(msg.image || null)}
+                              title="Click to zoom image"
+                            >
+                              <img
+                                src={msg.image}
+                                alt="Attached Problem Statement"
+                                className="max-h-48 sm:max-h-56 max-w-full rounded-xl object-cover hover:scale-102 transition-transform duration-200"
+                              />
+                              <div className="absolute inset-0 bg-black/30 opacity-0 group-hover/img:opacity-100 flex items-center justify-center transition-opacity">
+                                <span className="text-[11px] font-bold text-white bg-black/60 px-2.5 py-1 rounded-full flex items-center gap-1">
+                                  <ImageIcon className="w-3 h-3" /> Zoom
+                                </span>
+                              </div>
+                            </div>
+                          </div>
                         )}
-                      </button>
-                    )}
 
-                    {/* Content */}
-                    <div className="text-xs sm:text-sm leading-relaxed overflow-x-auto">
-                      {msg.role === "user" ? (
-                        <p className="whitespace-pre-wrap">{msg.content}</p>
-                      ) : (
-                        renderMessageContent(msg.content)
+                        {/* Content */}
+                        <div className="text-xs sm:text-sm leading-relaxed overflow-x-auto">
+                          {msg.role === "user" ? (
+                            <p className="whitespace-pre-wrap">{msg.content}</p>
+                          ) : (
+                            renderMessageContent(parsed?.text || msg.content)
+                          )}
+                        </div>
+
+                        {/* Contextual Suggestions Chips Under Assistant Response */}
+                        {parsed && parsed.suggestions.length > 0 && (
+                          <div className="mt-3.5 pt-2.5 border-t border-slate-200/70">
+                            <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1">
+                              <Sparkles className="w-3 h-3 text-indigo-500" />
+                              <span>Explore Next</span>
+                            </p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {parsed.suggestions.map((sug, sIdx) => (
+                                <button
+                                  key={sIdx}
+                                  onClick={() => handleSend(sug)}
+                                  className="text-[11px] bg-white hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-300 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-200/80 transition-all text-left shadow-2xs cursor-pointer flex items-center gap-1.5 group/chip"
+                                >
+                                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 group-hover/chip:scale-125 transition-transform" />
+                                  <span>{sug}</span>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {msg.role === "user" && (
+                        <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg sm:rounded-xl bg-slate-800 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
+                          <User className="w-3.5 h-3.5" />
+                        </div>
                       )}
                     </div>
-                  </div>
 
-                  {msg.role === "user" && (
-                    <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg sm:rounded-xl bg-slate-800 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
-                      <User className="w-3.5 h-3.5" />
-                    </div>
-                  )}
+                    {/* Action Bar (like ChatGPT / Gemini) under Assistant Messages */}
+                    {msg.role === "assistant" && (
+                      <div className="flex items-center gap-1 mt-1.5 ml-8 sm:ml-10 text-slate-400">
+                        {/* Copy Button */}
+                        <button
+                          onClick={() => handleCopy(parsed?.text || msg.content, idx)}
+                          className="p-1.5 rounded-md hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                          title="Copy answer"
+                        >
+                          {copiedIdx === idx ? (
+                            <Check className="w-3.5 h-3.5 text-emerald-600" />
+                          ) : (
+                            <Copy className="w-3.5 h-3.5" />
+                          )}
+                        </button>
+
+                        {/* Read Aloud Button (SpeechSynthesis) */}
+                        <button
+                          onClick={() => handleSpeak(parsed?.text || msg.content, idx)}
+                          className={`p-1.5 rounded-md transition-colors cursor-pointer ${
+                            speakingIdx === idx
+                              ? "text-indigo-600 bg-indigo-50"
+                              : "hover:text-slate-700 hover:bg-slate-100"
+                          }`}
+                          title={speakingIdx === idx ? "Stop reading aloud" : "Read aloud (TTS)"}
+                        >
+                          {speakingIdx === idx ? (
+                            <VolumeX className="w-3.5 h-3.5 text-indigo-600 animate-pulse" />
+                          ) : (
+                            <Volume2 className="w-3.5 h-3.5" />
+                          )}
+                        </button>
+
+                        {/* Regenerate Button (on latest assistant response) */}
+                        {isLatestAssistant && !loading && (
+                          <button
+                            onClick={handleRegenerate}
+                            className="p-1.5 rounded-md hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                            title="Regenerate answer"
+                          >
+                            <RefreshCw className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+
+                        {/* Thumbs Up Feedback */}
+                        <button
+                          onClick={() => handleFeedback(idx, "up")}
+                          className={`p-1.5 rounded-md transition-colors cursor-pointer ${
+                            feedbackState[idx] === "up"
+                              ? "text-emerald-600 bg-emerald-50"
+                              : "hover:text-slate-700 hover:bg-slate-100"
+                          }`}
+                          title="Helpful response"
+                        >
+                          <ThumbsUp className="w-3.5 h-3.5" />
+                        </button>
+
+                        {/* Thumbs Down Feedback */}
+                        <button
+                          onClick={() => handleFeedback(idx, "down")}
+                          className={`p-1.5 rounded-md transition-colors cursor-pointer ${
+                            feedbackState[idx] === "down"
+                              ? "text-rose-600 bg-rose-50"
+                              : "hover:text-slate-700 hover:bg-slate-100"
+                          }`}
+                          title="Needs improvement"
+                        >
+                          <ThumbsDown className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+
+              {/* Hero Quick Start Cards (ChatGPT / Gemini style) on fresh chat */}
+              {messages.length === 1 && !loading && (
+                <div className="ml-8 sm:ml-10 mt-2 max-w-2xl">
+                  <div className="flex items-center gap-1.5 mb-2.5">
+                    <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+                    <span className="text-xs font-semibold text-slate-700">
+                      Explore Placement & Technical Coaching Tracks
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {QUICK_START_CARDS.map((card, cIdx) => {
+                      const IconComponent = card.icon;
+                      return (
+                        <button
+                          key={cIdx}
+                          onClick={() => handleSend(card.prompt)}
+                          className="group text-left p-3 rounded-xl border border-slate-200/90 hover:border-indigo-300 bg-white hover:bg-indigo-50/40 transition-all shadow-2xs cursor-pointer flex flex-col justify-between"
+                        >
+                          <div>
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-[10px] font-mono text-indigo-600 font-semibold bg-indigo-50 px-1.5 py-0.5 rounded">
+                                {card.tag}
+                              </span>
+                              <IconComponent className="w-3.5 h-3.5 text-slate-400 group-hover:text-indigo-600 transition-colors" />
+                            </div>
+                            <h4 className="text-xs font-semibold text-slate-900 group-hover:text-indigo-900 transition-colors">
+                              {card.title}
+                            </h4>
+                            <p className="text-[11px] text-slate-500 mt-1 leading-snug line-clamp-2">
+                              {card.desc}
+                            </p>
+                          </div>
+                          <div className="mt-2 text-[10px] text-indigo-600 font-medium flex items-center gap-1">
+                            <span>Ask Prep AI</span>
+                            <span className="group-hover:translate-x-0.5 transition-transform">→</span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-              ))}
+              )}
 
               {/* Dynamic Thinking Bubble */}
               {loading && (
@@ -737,26 +985,6 @@ export default function CopilotPage() {
             </>
           )}
         </div>
-
-        {/* Suggested Doubts Chips */}
-        {messages.length === 1 && !loading && (
-          <div className="px-3 py-2 sm:px-4 bg-slate-50/70 border-t border-slate-100 shrink-0 overflow-x-auto">
-            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 flex items-center gap-1">
-              <span>⚡</span> Suggested Placement Doubts
-            </p>
-            <div className="flex flex-wrap gap-1.5">
-              {SUGGESTED_PROMPTS.slice(0, 4).map((prompt, i) => (
-                <button
-                  key={i}
-                  onClick={() => handleSend(prompt)}
-                  className="text-[11px] sm:text-xs bg-white hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200 text-slate-600 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl border border-slate-200 transition-all text-left shadow-xs cursor-pointer truncate max-w-full"
-                >
-                  {prompt}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Image Attachment Preview Ribbon */}
         {attachedImage && (

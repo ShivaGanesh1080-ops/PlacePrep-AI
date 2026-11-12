@@ -1547,6 +1547,132 @@ async function main() {
   }
   console.log(`✅ Seeded ${questions.length} Aptitude Questions (30 Quant, 30 Verbal, 30 Logical, 30 Technical).`);
 
+  // 5. Seed Calibrated Placement Data for Shiva Ganesh Akku
+  console.log("🌱 Seeding assessment & interview calibration data for shiva@student.com...");
+
+  const testAttemptsData = [
+    {
+      id: "test-attempt-shiva-1",
+      userId: student1.id,
+      category: "TECHNICAL",
+      score: 10,
+      total: 10,
+      timeTaken: 420,
+      answers: JSON.stringify({ "0": "B", "1": "C", "2": "B", "3": "B", "4": "B" }),
+      createdAt: new Date(Date.now() - 4 * 86400000),
+    },
+    {
+      id: "test-attempt-shiva-2",
+      userId: student1.id,
+      category: "QUANTITATIVE",
+      score: 9,
+      total: 10,
+      timeTaken: 510,
+      answers: JSON.stringify({ "0": "B", "1": "A", "2": "A", "3": "C", "4": "B" }),
+      createdAt: new Date(Date.now() - 3 * 86400000),
+    },
+    {
+      id: "test-attempt-shiva-3",
+      userId: student1.id,
+      category: "LOGICAL",
+      score: 9,
+      total: 10,
+      timeTaken: 460,
+      answers: JSON.stringify({ "0": "A", "1": "C", "2": "B", "3": "D", "4": "A" }),
+      createdAt: new Date(Date.now() - 2 * 86400000),
+    },
+    {
+      id: "test-attempt-shiva-4",
+      userId: student1.id,
+      category: "VERBAL",
+      score: 8,
+      total: 10,
+      timeTaken: 380,
+      answers: JSON.stringify({ "0": "B", "1": "A", "2": "C", "3": "A", "4": "D" }),
+      createdAt: new Date(Date.now() - 1 * 86400000),
+    },
+    {
+      id: "test-attempt-shiva-5",
+      userId: student1.id,
+      category: "TECHNICAL",
+      score: 10,
+      total: 10,
+      timeTaken: 390,
+      answers: JSON.stringify({ "0": "C", "1": "B", "2": "B", "3": "B", "4": "A" }),
+      createdAt: new Date(Date.now() - 3 * 3600000),
+    },
+  ];
+
+  for (const t of testAttemptsData) {
+    await prisma.testAttempt.create({ data: t });
+  }
+  console.log("✅ Seeded 5 calibrated aptitude test attempts for Shiva Ganesh Akku.");
+
+  // 6. Mock Interviews
+  await prisma.mockInterview.create({
+    data: {
+      id: "mock-interview-shiva-1",
+      userId: student1.id,
+      type: "TECHNICAL",
+      transcript: JSON.stringify([
+        { role: "interviewer", content: "Welcome Shiva. Can you explain how you would design an LRU Cache with O(1) operations?" },
+        { role: "candidate", content: "I would use a doubly linked list combined with a hash map. The hash map maps keys to doubly linked list node pointers, allowing O(1) lookup, insertion, and eviction." },
+      ]),
+      feedback: "Outstanding grasp of algorithmic tradeoffs, memory locality, and pointer mechanics. Candidate demonstrated production-readiness.",
+      score: 88,
+      createdAt: new Date(Date.now() - 3 * 86400000),
+    },
+  });
+
+  await prisma.mockInterview.create({
+    data: {
+      id: "mock-interview-shiva-2",
+      userId: student1.id,
+      type: "HR",
+      transcript: JSON.stringify([
+        { role: "interviewer", content: "Tell me about a challenging technical deadline or critical bug you resolved." },
+        { role: "candidate", content: "During our multi-tenant QR commerce platform launch, we observed database contention under concurrent order surges. I profiled the Prisma transaction queries, eliminated redundant round-trips, and achieved sub-100ms p99 response times." },
+      ]),
+      feedback: "Exceptional STAR formulation with measurable technical outcomes and strong composure.",
+      score: 92,
+      createdAt: new Date(Date.now() - 1 * 86400000),
+    },
+  });
+  console.log("✅ Seeded 2 mock interview rounds with feedback.");
+
+  // 7. ATS Resume Analysis
+  await prisma.resumeAnalysis.create({
+    data: {
+      id: "resume-analysis-shiva-1",
+      userId: student1.id,
+      resumeText: "Shiva Ganesh Akku | B.Tech CSE (9.52 CGPA) | Stack: Next.js, TypeScript, PostgreSQL, Prisma, Tailwind CSS, System Design | Projects: Qordrz multi-tenant QR commerce platform.",
+      score: 89,
+      feedback: JSON.stringify({
+        score: 89,
+        summary: "High-caliber engineering profile showcasing proven full-stack and systems competence. Clean structural layout with strong quantification of engineering impact.",
+        strengths: [
+          "Quantified technical impact across full-stack applications",
+          "Production-ready stack (Next.js, TypeScript, PostgreSQL, Prisma)",
+          "Rigorous CS fundamentals and system architecture depth"
+        ],
+        improvements: [
+          "Include live benchmark latency metrics for API endpoints",
+          "Highlight distributed caching patterns (Redis / LRU)"
+        ],
+        matchingKeywords: ["TypeScript", "Next.js", "PostgreSQL", "Prisma", "Tailwind CSS", "Data Structures", "System Design"],
+        missingKeywords: ["Kafka", "Kubernetes"],
+        rewrittenBullets: [
+          {
+            original: "Built a web app for placing food orders using QR codes",
+            rewritten: "Architected multi-tenant QR commerce platform with Next.js and atomic PostgreSQL transactions, reducing ordering checkout latency by 45%"
+          }
+        ]
+      }),
+      createdAt: new Date(Date.now() - 2 * 86400000),
+    },
+  });
+  console.log("✅ Seeded ATS Resume analysis with 89% score.");
+
   console.log("🎉 Database seeding completed successfully!");
 }
 
