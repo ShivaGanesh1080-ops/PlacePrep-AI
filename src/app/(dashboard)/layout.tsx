@@ -293,9 +293,36 @@ export default function DashboardLayout({
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-x-hidden min-w-0">
+        <main className="flex-1 p-3.5 sm:p-6 lg:p-8 pb-20 lg:pb-8 overflow-x-hidden min-w-0">
           {children}
         </main>
+
+        {/* Mobile Bottom Navigation Bar (Phone-Optimized, 0 friction) */}
+        <nav className="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/90 lg:hidden px-2 py-1.5 flex items-center justify-around shadow-lg">
+          {[
+            { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+            { label: "Prep AI", href: "/copilot", icon: Bot },
+            { label: "Tests", href: "/tests", icon: ClipboardCheck },
+            { label: "Resume", href: "/resume", icon: FileText },
+            { label: "Interview", href: "/interview", icon: MessageSquare },
+          ].map((item) => {
+            const active = isActive(item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl text-[10px] font-medium transition-colors ${
+                  active
+                    ? "text-indigo-600 font-bold bg-indigo-50/70"
+                    : "text-slate-500 hover:text-slate-800"
+                }`}
+              >
+                <item.icon className={`w-4 h-4 mb-0.5 ${active ? "text-indigo-600" : "text-slate-400"}`} />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
       </div>
     </div>
   );

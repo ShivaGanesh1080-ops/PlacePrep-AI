@@ -260,24 +260,24 @@ export default function TestTakingPage() {
       </div>
 
       {/* Question Card */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 mb-6">
-        <p className="text-lg font-semibold text-slate-900 leading-relaxed mb-8">{currentQuestion.text}</p>
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 lg:p-8 mb-6">
+        <p className="text-base sm:text-lg font-semibold text-slate-900 leading-relaxed mb-5 sm:mb-8">{currentQuestion.text}</p>
 
-        <div className="space-y-3">
+        <div className="space-y-2.5 sm:space-y-3">
           {options.map((opt) => {
             const isSelected = currentAnswer === opt.key;
             return (
               <button
                 key={opt.key}
                 onClick={() => selectOption(opt.key)}
-                className={`w-full text-left flex items-center gap-4 p-4 rounded-xl border-2 transition-all duration-150 ${
+                className={`w-full text-left flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl border-2 transition-all duration-150 ${
                   isSelected
                     ? "border-indigo-500 bg-indigo-50 shadow-sm"
                     : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
                 }`}
               >
                 <span
-                  className={`flex items-center justify-center w-9 h-9 rounded-lg text-sm font-bold shrink-0 ${
+                  className={`flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-lg text-xs sm:text-sm font-bold shrink-0 ${
                     isSelected
                       ? "bg-indigo-600 text-white"
                       : "bg-slate-100 text-slate-600"
@@ -285,7 +285,7 @@ export default function TestTakingPage() {
                 >
                   {opt.key}
                 </span>
-                <span className={`text-base ${isSelected ? "text-indigo-900 font-medium" : "text-slate-700"}`}>
+                <span className={`text-sm sm:text-base ${isSelected ? "text-indigo-900 font-medium" : "text-slate-700"}`}>
                   {opt.value}
                 </span>
               </button>

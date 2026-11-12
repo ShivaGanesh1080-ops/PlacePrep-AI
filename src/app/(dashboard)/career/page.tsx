@@ -408,7 +408,7 @@ export default function CareerPage() {
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Analyzing with Ollama...
+                  Calibrating Career Pathways with AI...
                 </>
               ) : (
                 <>
@@ -423,9 +423,9 @@ export default function CareerPage() {
         {/* Results Column */}
         <div className="lg:col-span-7 space-y-6">
           {loading ? (
-            <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center flex flex-col items-center justify-center min-h-[450px]">
+            <div className="bg-white rounded-3xl border border-slate-200 p-8 sm:p-12 text-center flex flex-col items-center justify-center min-h-[360px] sm:min-h-[450px]">
               <Loader2 className="w-10 h-10 animate-spin text-indigo-600 mb-4" />
-              <h3 className="text-base font-bold text-slate-900">Ollama is analyzing your profile</h3>
+              <h3 className="text-base font-bold text-slate-900">Career Intelligence is analyzing your profile</h3>
               <p className="text-xs text-slate-500 max-w-sm mt-1">
                 Comparing your CGPA, branch, and technical strengths against 50+ placement roles and computing custom roadmaps...
               </p>

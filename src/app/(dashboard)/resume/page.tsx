@@ -762,38 +762,38 @@ Looking for junior frontend developer or web design roles.`,
             {result ? (
               <>
                 {/* 1. Header Score Gauges */}
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-3 gap-2 sm:gap-3">
                   {/* Overall Quality */}
-                  <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-2xs flex flex-col items-center text-center">
-                    <span className="text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                  <div className="bg-white rounded-2xl border border-slate-200/80 p-2.5 sm:p-4 shadow-2xs flex flex-col items-center text-center">
+                    <span className="text-[9px] sm:text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-wider mb-1.5 sm:mb-2 truncate max-w-full">
                       Overall Score
                     </span>
-                    <div className="w-16 h-16 rounded-full border-4 border-indigo-600 flex items-center justify-center text-xl font-bold font-mono text-indigo-700 bg-indigo-50/40">
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full border-3 sm:border-4 border-indigo-600 flex items-center justify-center text-base sm:text-xl font-bold font-mono text-indigo-700 bg-indigo-50/40">
                       {result.score}%
                     </div>
-                    <span className="text-[11px] text-slate-600 mt-2 font-medium">Recruiter Caliber</span>
+                    <span className="text-[10px] sm:text-[11px] text-slate-600 mt-1.5 sm:mt-2 font-medium truncate max-w-full">Recruiter Caliber</span>
                   </div>
 
                   {/* ATS Parseability */}
-                  <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-2xs flex flex-col items-center text-center">
-                    <span className="text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                  <div className="bg-white rounded-2xl border border-slate-200/80 p-2.5 sm:p-4 shadow-2xs flex flex-col items-center text-center">
+                    <span className="text-[9px] sm:text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-wider mb-1.5 sm:mb-2 truncate max-w-full">
                       ATS Pass Rate
                     </span>
-                    <div className="w-16 h-16 rounded-full border-4 border-emerald-500 flex items-center justify-center text-xl font-bold font-mono text-emerald-700 bg-emerald-50/40">
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full border-3 sm:border-4 border-emerald-500 flex items-center justify-center text-base sm:text-xl font-bold font-mono text-emerald-700 bg-emerald-50/40">
                       {result.atsScore}%
                     </div>
-                    <span className="text-[11px] text-slate-600 mt-2 font-medium">Parser Friendly</span>
+                    <span className="text-[10px] sm:text-[11px] text-slate-600 mt-1.5 sm:mt-2 font-medium truncate max-w-full">Parser Friendly</span>
                   </div>
 
                   {/* Target Role Match */}
-                  <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-2xs flex flex-col items-center text-center">
-                    <span className="text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                  <div className="bg-white rounded-2xl border border-slate-200/80 p-2.5 sm:p-4 shadow-2xs flex flex-col items-center text-center">
+                    <span className="text-[9px] sm:text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-wider mb-1.5 sm:mb-2 truncate max-w-full">
                       Role Match
                     </span>
-                    <div className="w-16 h-16 rounded-full border-4 border-blue-600 flex items-center justify-center text-xl font-bold font-mono text-blue-700 bg-blue-50/40">
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full border-3 sm:border-4 border-blue-600 flex items-center justify-center text-base sm:text-xl font-bold font-mono text-blue-700 bg-blue-50/40">
                       {result.roleMatchScore || Math.round(result.score * 0.95)}%
                     </div>
-                    <span className="text-[11px] text-slate-600 mt-2 font-medium truncate max-w-[100px]">
+                    <span className="text-[10px] sm:text-[11px] text-slate-600 mt-1.5 sm:mt-2 font-medium truncate max-w-full">
                       {result.targetRole?.split(" ")[0] || "Target"}
                     </span>
                   </div>

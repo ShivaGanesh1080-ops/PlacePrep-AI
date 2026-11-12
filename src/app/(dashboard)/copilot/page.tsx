@@ -981,7 +981,7 @@ export default function CopilotPage() {
 
               {/* Hero Quick Start Cards (ChatGPT / Gemini style) on fresh chat */}
               {messages.length === 1 && !loading && (
-                <div className="ml-8 sm:ml-10 mt-2 max-w-2xl">
+                <div className="ml-0 sm:ml-10 mt-2 max-w-2xl">
                   <div className="flex items-center gap-1.5 mb-2.5">
                     <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
                     <span className="text-xs font-semibold text-slate-700">
