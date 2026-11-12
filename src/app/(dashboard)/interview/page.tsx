@@ -293,7 +293,7 @@ export default function InterviewPage() {
                 Strengths
               </h4>
               <ul className="space-y-2">
-                {feedback.strengths.map((s, idx) => (
+                {(feedback.strengths || []).map((s, idx) => (
                   <li key={idx} className="flex items-start gap-2 text-sm text-slate-700">
                     <Award className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />
                     <span>{s}</span>
@@ -309,7 +309,7 @@ export default function InterviewPage() {
                 Areas for Improvement
               </h4>
               <ul className="space-y-2">
-                {feedback.improvements.map((imp, idx) => (
+                {(feedback.improvements || []).map((imp, idx) => (
                   <li key={idx} className="flex items-start gap-2 text-sm text-slate-700">
                     <ChevronRight className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
                     <span>{imp}</span>
@@ -479,38 +479,81 @@ export default function InterviewPage() {
             {previousInterviews.map((interview) => (
               <div
                 key={interview.id}
-                className="p-4 rounded-xl border border-slate-200 hover:bg-slate-50 transition"
+                onClick={() => {
+                  if (!interview.feedback) return;
+                  let parsed: InterviewFeedback;
+                  try {
+                    const data =
+                      typeof interview.feedback === "string" && interview.feedback.startsWith("{")
+                        ? JSON.parse(interview.feedback)
+                        : null;
+                    if (data && typeof data === "object") {
+                      parsed = {
+                        score: interview.score ?? data.score ?? 80,
+                        feedback: data.feedback || String(interview.feedback),
+                        strengths: Array.isArray(data.strengths)
+                          ? data.strengths
+                          : ["Strong core technical foundation", "Structured problem-solving breakdown"],
+                        improvements: Array.isArray(data.improvements)
+                          ? data.improvements
+                          : ["Elaborate on real-world system bottlenecks and scale"],
+                      };
+                    } else {
+                      parsed = {
+                        score: interview.score ?? 80,
+                        feedback: String(interview.feedback),
+                        strengths: [
+                          "Strong problem formulation and communication",
+                          "Solid architectural grasp of algorithms and systems",
+                        ],
+                        improvements: ["Include quantified project metrics and edge case handling"],
+                      };
+                    }
+                  } catch {
+                    parsed = {
+                      score: interview.score ?? 80,
+                      feedback: String(interview.feedback),
+                      strengths: ["Clear communication", "Structured algorithmic thinking"],
+                      improvements: ["Elaborate on production scale and system tradeoffs"],
+                    };
+                  }
+                  setFeedback(parsed);
+                }}
+                className="p-4 rounded-xl border border-slate-200/80 hover:border-indigo-300 hover:bg-slate-50/70 transition cursor-pointer flex items-center justify-between group"
+                title="Click to view full feedback evaluation"
               >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-slate-900">
-                        {interview.type} Interview
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                      {interview.type} Interview
+                    </span>
+                    {interview.score !== null && (
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-xs font-bold ${
+                          interview.score >= 80
+                            ? "bg-emerald-100 text-emerald-700"
+                            : interview.score >= 60
+                            ? "bg-amber-100 text-amber-700"
+                            : "bg-red-100 text-red-700"
+                        }`}
+                      >
+                        {interview.score}/100
                       </span>
-                      {interview.score !== null && (
-                        <span
-                          className={`px-2 py-0.5 rounded-full text-xs font-bold ${
-                            interview.score >= 80
-                              ? "bg-emerald-100 text-emerald-700"
-                              : interview.score >= 60
-                              ? "bg-amber-100 text-amber-700"
-                              : "bg-red-100 text-red-700"
-                          }`}
-                        >
-                          {interview.score}/100
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-sm text-slate-500 mt-1">
-                      {new Date(interview.createdAt).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </p>
+                    )}
                   </div>
+                  <p className="text-xs text-slate-500 mt-1">
+                    {new Date(interview.createdAt).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                </div>
+                <div className="text-xs font-semibold text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                  <span>View Review</span>
+                  <span>→</span>
                 </div>
               </div>
             ))}

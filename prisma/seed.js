@@ -1626,11 +1626,37 @@ async function main() {
         data: {
             id: "resume-analysis-shiva-1",
             userId: student1.id,
-            resumeText: "Shiva Ganesh Akku | B.Tech CSE (9.52 CGPA) | Stack: Next.js, TypeScript, PostgreSQL, Prisma, Tailwind CSS, System Design | Projects: Qordrz multi-tenant QR commerce platform.",
+            resumeText: "SHIVA GANESH AKKU\nHyderabad, India | +91 9876543210 | shiva@student.com | linkedin.com/in/shivaganesh | github.com/ShivaGanesh1080-ops\n\nEDUCATION\nSR University — B.Tech Computer Science and Engineering | CGPA: 9.52 (2023 - 2027)\n\nTECHNICAL SKILLS\nLanguages: TypeScript, JavaScript, Python, C++, SQL\nFrameworks: Next.js, React, Node.js, Express, Tailwind CSS\nDatabases: PostgreSQL, Supabase, Prisma ORM, SQLite\nCore CS: Operating Systems, Computer Networks, Data Structures & Algorithms, System Design\nTools: Git, GitHub, Docker, Postman\n\nPROJECTS\nQordrz — Multi-Tenant QR Commerce Platform\n- Architected multi-tenant QR ordering engine with Next.js and PostgreSQL atomic transactions, reducing checkout latency by 45%.\n- Designed role-based authentication and tenant isolation safeguards across 20+ merchant test sites.\n\nPlacePrep AI — AI Placement Intelligence Portal\n- Developed automated recruitment preparation suite with real-time code sandbox, STAR interview simulator, and ATS resume scoring.\n- Integrated multi-model AI fallbacks ensuring sub-second response times.",
             score: 89,
             feedback: JSON.stringify({
                 score: 89,
+                atsScore: 89,
+                roleMatchScore: 92,
+                targetRole: "Software Development Engineer (Full Stack)",
+                wordCount: 380,
                 summary: "High-caliber engineering profile showcasing proven full-stack and systems competence. Clean structural layout with strong quantification of engineering impact.",
+                foundKeywords: ["TypeScript", "Next.js", "PostgreSQL", "Prisma", "Tailwind CSS", "Data Structures", "System Design", "Git", "Docker", "REST APIs", "C++", "SQL"],
+                missingKeywords: ["Kafka", "Kubernetes", "Redis"],
+                bulletRewrites: [
+                    {
+                        original: "Built a web app for placing food orders using QR codes",
+                        rewritten: "Architected multi-tenant QR commerce platform with Next.js and atomic PostgreSQL transactions, reducing ordering checkout latency by 45%",
+                        reason: "Applies Google XYZ Formula with quantifiable performance impact."
+                    },
+                    {
+                        original: "Created a placement portal with code runner and interview questions",
+                        rewritten: "Engineered scalable AI placement portal with polyglot code execution sandbox and STAR interview evaluation, maintaining sub-100ms response times",
+                        reason: "Replaces generic description with architectural metrics."
+                    }
+                ],
+                sections: {
+                    contact: { score: 95, feedback: "Complete contact links with active GitHub and LinkedIn profiles." },
+                    education: { score: 95, feedback: "Strong 9.52 CGPA in B.Tech CSE exceeding MNC eligibility criteria." },
+                    experience: { score: 88, feedback: "Strong entrepreneurial and engineering initiative on production software." },
+                    skills: { score: 92, feedback: "Exceptional modern tech stack covering frontend, backend, and persistence." },
+                    projects: { score: 90, feedback: "Clear project architecture with high-impact transaction optimization." },
+                    formatting: { score: 94, feedback: "Standard single-page ATS-parseable structure without complex multi-column tables." }
+                },
                 strengths: [
                     "Quantified technical impact across full-stack applications",
                     "Production-ready stack (Next.js, TypeScript, PostgreSQL, Prisma)",
@@ -1639,14 +1665,6 @@ async function main() {
                 improvements: [
                     "Include live benchmark latency metrics for API endpoints",
                     "Highlight distributed caching patterns (Redis / LRU)"
-                ],
-                matchingKeywords: ["TypeScript", "Next.js", "PostgreSQL", "Prisma", "Tailwind CSS", "Data Structures", "System Design"],
-                missingKeywords: ["Kafka", "Kubernetes"],
-                rewrittenBullets: [
-                    {
-                        original: "Built a web app for placing food orders using QR codes",
-                        rewritten: "Architected multi-tenant QR commerce platform with Next.js and atomic PostgreSQL transactions, reducing ordering checkout latency by 45%"
-                    }
                 ]
             }),
             createdAt: new Date(Date.now() - 2 * 86400000),
