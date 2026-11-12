@@ -14,6 +14,7 @@ import {
   Code2,
   ChevronRight,
   Activity as ActivityIcon,
+  Sparkles,
 } from "lucide-react";
 import {
   LineChart,
@@ -75,7 +76,7 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
+        <Loader2 className="w-6 h-6 animate-spin text-[#7A6658]" />
       </div>
     );
   }
@@ -93,115 +94,120 @@ export default function DashboardPage() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 pb-12">
-      {/* Overview Context Header (Quiet, disciplined, no slop) */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      {/* Overview Context Header (Warm Editorial Framing) */}
+      <div className="bg-[#FFFFFF] rounded-2xl border border-[#382418]/10 p-6 sm:p-7 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
         <div>
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="text-[11px] font-mono text-indigo-600 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-md font-medium">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-[11px] font-semibold text-[#1E3A5F] bg-[#8EC5FF]/25 border border-[#8EC5FF]/40 px-2.5 py-0.5 rounded-full">
               SDE-1 Track
             </span>
-            <span className="text-xs text-slate-400">•</span>
-            <span className="text-xs text-slate-500 font-mono">
+            <span className="text-xs text-[#C4B5A5]">•</span>
+            <span className="text-xs font-mono font-medium text-[#7A6658]">
               Cycle 2026
             </span>
           </div>
-          <h1 className="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-bold text-[#382418] tracking-tight">
             Preparation Overview
           </h1>
-          <p className="text-xs text-slate-500 mt-1 max-w-xl">
+          <p className="text-xs text-[#7A6658] mt-1 max-w-xl leading-relaxed">
             {stats.testsTaken === 0
               ? "Complete baseline rounds in aptitude, code sandbox, and mock interviews to calibrate your readiness index."
               : `Completed ${stats.testsTaken} assessment round${stats.testsTaken > 1 ? "s" : ""} across Quant, Logical, and Technical domains.`}
           </p>
         </div>
 
-        <div className="flex items-center gap-2 self-stretch sm:self-auto">
+        <div className="flex items-center gap-2.5 self-stretch sm:self-auto shrink-0">
           <Link
             href="/copilot"
-            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium rounded-lg transition-colors shadow-2xs"
+            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#382418] hover:bg-[#25170F] text-[#F2E8DA] text-xs font-semibold rounded-xl transition-all shadow-xs cursor-pointer"
           >
-            <Code2 className="w-3.5 h-3.5" />
+            <Code2 className="w-3.5 h-3.5 text-[#8EC5FF]" />
             <span>Open Prep Copilot</span>
           </Link>
           <Link
             href="/tests"
-            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium rounded-lg border border-slate-200 transition-colors shadow-2xs"
+            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-[#FFFFFF] hover:bg-[#FAF6F0] text-[#382418] text-xs font-semibold rounded-xl border border-[#382418]/15 transition-all shadow-2xs cursor-pointer"
           >
             <span>Take Test</span>
           </Link>
         </div>
       </div>
 
-      {/* KPI Stats Grid: Strict 4-Card Tabular Numbers */}
+      {/* KPI Stats Grid: Hero Readiness Score & Structured Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-        {/* Card 1 */}
-        <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-2xs">
-          <div className="flex items-center justify-between text-slate-500 mb-1">
-            <span className="text-xs font-medium text-slate-600">Aptitude rounds</span>
-            <ClipboardCheck className="w-4 h-4 text-slate-400" />
+        {/* Card 1: Aptitude Rounds */}
+        <div className="bg-[#FFFFFF] rounded-2xl border border-[#382418]/10 p-4.5 shadow-2xs transition-all hover:border-[#382418]/25">
+          <div className="flex items-center justify-between text-[#7A6658] mb-1">
+            <span className="text-xs font-semibold text-[#5A4537]">Aptitude rounds</span>
+            <ClipboardCheck className="w-4 h-4 text-[#7A6658]" />
           </div>
-          <div className="text-2xl font-semibold font-mono tabular-nums text-slate-900 mt-1">
+          <div className="text-2xl font-bold font-mono tabular-nums text-[#382418] mt-1.5">
             {stats.testsTaken}
           </div>
-          <p className="text-[11px] text-slate-400 mt-1 truncate">
+          <p className="text-[11px] text-[#7A6658] mt-1 truncate">
             {stats.testsTaken === 0 ? "Target: 10 baseline rounds" : `${stats.testsTaken} completed attempts`}
           </p>
         </div>
 
-        {/* Card 2 */}
-        <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-2xs">
-          <div className="flex items-center justify-between text-slate-500 mb-1">
-            <span className="text-xs font-medium text-slate-600">Average accuracy</span>
-            <Target className="w-4 h-4 text-slate-400" />
+        {/* Card 2: Average Accuracy */}
+        <div className="bg-[#FFFFFF] rounded-2xl border border-[#382418]/10 p-4.5 shadow-2xs transition-all hover:border-[#382418]/25">
+          <div className="flex items-center justify-between text-[#7A6658] mb-1">
+            <span className="text-xs font-semibold text-[#5A4537]">Average accuracy</span>
+            <Target className="w-4 h-4 text-[#7A6658]" />
           </div>
-          <div className="text-2xl font-semibold font-mono tabular-nums text-slate-900 mt-1">
+          <div className="text-2xl font-bold font-mono tabular-nums text-[#382418] mt-1.5">
             {stats.testsTaken === 0 ? "—" : `${stats.avgScore}%`}
           </div>
-          <p className="text-[11px] text-slate-400 mt-1 truncate">
+          <p className="text-[11px] text-[#7A6658] mt-1 truncate">
             {stats.testsTaken === 0 ? "Pending test submission" : "Across evaluated attempts"}
           </p>
         </div>
 
-        {/* Card 3 */}
-        <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-2xs">
-          <div className="flex items-center justify-between text-slate-500 mb-1">
-            <span className="text-xs font-medium text-slate-600">Readiness score</span>
-            <Brain className="w-4 h-4 text-indigo-600" />
+        {/* Card 3: HERO Readiness Score (Elevated with Baby Blue Accent) */}
+        <div className="bg-gradient-to-br from-[#FFFFFF] via-[#FAF6F0] to-[#EBF4FF] rounded-2xl border-2 border-[#8EC5FF] p-4.5 shadow-xs relative overflow-hidden transition-all hover:shadow-sm">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-xs font-bold text-[#1E3A5F]">Readiness score</span>
+            <div className="w-6 h-6 rounded-full bg-[#8EC5FF]/30 flex items-center justify-center text-[#1E3A5F]">
+              <Brain className="w-3.5 h-3.5" />
+            </div>
           </div>
-          <div className="text-2xl font-semibold font-mono tabular-nums text-slate-900 mt-1">
-            {data?.readinessScore ?? 0}%
+          <div className="text-2xl font-black font-mono tabular-nums text-[#382418] mt-1.5 flex items-baseline gap-2">
+            <span>{data?.readinessScore ?? 0}%</span>
+            <span className="text-[10px] font-bold text-[#1E3A5F] bg-[#8EC5FF]/40 px-2 py-0.5 rounded-full uppercase tracking-wider">
+              Optimal
+            </span>
           </div>
-          <p className="text-[11px] text-slate-400 mt-1 truncate">
+          <p className="text-[11px] font-medium text-[#1E3A5F] mt-1 truncate">
             {(data?.readinessScore ?? 0) >= 60 ? "Calibrated from prep activity" : "Baseline calibration level"}
           </p>
         </div>
 
-        {/* Card 4 */}
-        <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-2xs">
-          <div className="flex items-center justify-between text-slate-500 mb-1">
-            <span className="text-xs font-medium text-slate-600">Mock interviews</span>
-            <MessageSquare className="w-4 h-4 text-slate-400" />
+        {/* Card 4: Mock Interviews */}
+        <div className="bg-[#FFFFFF] rounded-2xl border border-[#382418]/10 p-4.5 shadow-2xs transition-all hover:border-[#382418]/25">
+          <div className="flex items-center justify-between text-[#7A6658] mb-1">
+            <span className="text-xs font-semibold text-[#5A4537]">Mock interviews</span>
+            <MessageSquare className="w-4 h-4 text-[#7A6658]" />
           </div>
-          <div className="text-2xl font-semibold font-mono tabular-nums text-slate-900 mt-1">
+          <div className="text-2xl font-bold font-mono tabular-nums text-[#382418] mt-1.5">
             {stats.interviewSessions}
           </div>
-          <p className="text-[11px] text-slate-400 mt-1 truncate">
+          <p className="text-[11px] text-[#7A6658] mt-1 truncate">
             {stats.interviewSessions === 0 ? "Target: 3 STAR evaluations" : `${stats.interviewSessions} sessions completed`}
           </p>
         </div>
       </div>
 
-      {/* Analytics Charts */}
+      {/* Analytics Charts with Baby Blue & Espresso Palette */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Performance Trend */}
-        <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-2xs">
-          <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+        <div className="bg-[#FFFFFF] rounded-2xl border border-[#382418]/10 p-5 sm:p-6 shadow-2xs">
+          <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#382418]/8">
             <div>
-              <h3 className="text-xs font-semibold text-slate-900">Score trajectory</h3>
-              <p className="text-[11px] text-slate-400 mt-0.5">Assessment progress by sequential attempt</p>
+              <h3 className="text-xs font-bold text-[#382418]">Score trajectory</h3>
+              <p className="text-[11px] text-[#7A6658] mt-0.5">Assessment progress by sequential attempt</p>
             </div>
             {trendData.length > 0 && (
-              <span className="text-[11px] font-mono text-slate-500">
+              <span className="text-[11px] font-mono font-medium text-[#7A6658] bg-[#F2E8DA] px-2 py-0.5 rounded-md">
                 {trendData.length} records
               </span>
             )}
@@ -211,57 +217,58 @@ export default function DashboardPage() {
             <div className="h-56 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={trendData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                  <XAxis dataKey="test" stroke="#94a3b8" fontSize={10} tickLine={false} />
-                  <YAxis domain={[0, 100]} stroke="#94a3b8" fontSize={10} tickLine={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#F2E8DA" />
+                  <XAxis dataKey="test" stroke="#7A6658" fontSize={10} tickLine={false} />
+                  <YAxis domain={[0, 100]} stroke="#7A6658" fontSize={10} tickLine={false} />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "#0f172a",
+                      backgroundColor: "#382418",
                       border: "none",
                       borderRadius: "8px",
-                      color: "#fff",
+                      color: "#F2E8DA",
                       fontSize: "11px",
-                      padding: "6px 10px",
+                      padding: "6px 12px",
+                      boxShadow: "0 4px 12px rgba(56, 36, 24, 0.2)",
                     }}
                   />
                   <Line
                     type="monotone"
                     dataKey="score"
-                    stroke="#4f46e5"
-                    strokeWidth={2}
-                    dot={{ fill: "#4f46e5", strokeWidth: 1.5, r: 3 }}
-                    activeDot={{ r: 5 }}
+                    stroke="#382418"
+                    strokeWidth={2.5}
+                    dot={{ fill: "#8EC5FF", stroke: "#382418", strokeWidth: 2, r: 4 }}
+                    activeDot={{ r: 6, fill: "#8EC5FF", stroke: "#382418" }}
                   />
                 </LineChart>
               </ResponsiveContainer>
             </div>
           ) : (
-            <div className="h-56 flex flex-col items-center justify-center text-center p-6 border border-dashed border-slate-200 rounded-lg bg-slate-50/50">
-              <ActivityIcon className="w-7 h-7 text-slate-300 mb-2" />
-              <h4 className="text-xs font-semibold text-slate-700">No assessment data yet</h4>
-              <p className="text-[11px] text-slate-400 max-w-xs mt-1">
+            <div className="h-56 flex flex-col items-center justify-center text-center p-6 border border-dashed border-[#382418]/15 rounded-xl bg-[#FAF6F0]/50">
+              <ActivityIcon className="w-7 h-7 text-[#C4B5A5] mb-2" />
+              <h4 className="text-xs font-semibold text-[#382418]">No assessment data yet</h4>
+              <p className="text-[11px] text-[#7A6658] max-w-xs mt-1">
                 Take an aptitude test to plot your score trajectory across Quant, Logical, and Technical domains.
               </p>
               <Link
                 href="/tests"
-                className="mt-3 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium transition inline-flex items-center gap-1 shadow-2xs"
+                className="mt-3 px-3.5 py-1.5 rounded-lg bg-[#382418] hover:bg-[#25170F] text-[#F2E8DA] text-xs font-semibold transition inline-flex items-center gap-1.5 shadow-2xs"
               >
                 <span>Take first test</span>
-                <ArrowRight className="w-3 h-3" />
+                <ArrowRight className="w-3 h-3 text-[#8EC5FF]" />
               </Link>
             </div>
           )}
         </div>
 
         {/* Domain Competence */}
-        <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-2xs">
-          <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+        <div className="bg-[#FFFFFF] rounded-2xl border border-[#382418]/10 p-5 sm:p-6 shadow-2xs">
+          <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#382418]/8">
             <div>
-              <h3 className="text-xs font-semibold text-slate-900">Domain competence</h3>
-              <p className="text-[11px] text-slate-400 mt-0.5">Average score distribution across categories</p>
+              <h3 className="text-xs font-bold text-[#382418]">Domain competence</h3>
+              <p className="text-[11px] text-[#7A6658] mt-0.5">Average score distribution across categories</p>
             </div>
             {hasCategoryActivity && (
-              <span className="text-[11px] font-mono text-emerald-600">
+              <span className="text-[11px] font-mono font-semibold text-[#1E3A5F] bg-[#8EC5FF]/25 px-2 py-0.5 rounded-md">
                 Calibrated
               </span>
             )}
@@ -271,36 +278,37 @@ export default function DashboardPage() {
             <div className="h-56 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={categoryData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                  <XAxis dataKey="name" stroke="#94a3b8" fontSize={10} tickLine={false} />
-                  <YAxis domain={[0, 100]} stroke="#94a3b8" fontSize={10} tickLine={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#F2E8DA" />
+                  <XAxis dataKey="name" stroke="#7A6658" fontSize={10} tickLine={false} />
+                  <YAxis domain={[0, 100]} stroke="#7A6658" fontSize={10} tickLine={false} />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "#0f172a",
+                      backgroundColor: "#382418",
                       border: "none",
                       borderRadius: "8px",
-                      color: "#fff",
+                      color: "#F2E8DA",
                       fontSize: "11px",
-                      padding: "6px 10px",
+                      padding: "6px 12px",
+                      boxShadow: "0 4px 12px rgba(56, 36, 24, 0.2)",
                     }}
                   />
-                  <Bar dataKey="score" fill="#4f46e5" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="score" fill="#8EC5FF" radius={[5, 5, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           ) : (
-            <div className="h-56 flex flex-col items-center justify-center text-center p-6 border border-dashed border-slate-200 rounded-lg bg-slate-50/50">
-              <Target className="w-7 h-7 text-slate-300 mb-2" />
-              <h4 className="text-xs font-semibold text-slate-700">Domain calibration pending</h4>
-              <p className="text-[11px] text-slate-400 max-w-xs mt-1">
+            <div className="h-56 flex flex-col items-center justify-center text-center p-6 border border-dashed border-[#382418]/15 rounded-xl bg-[#FAF6F0]/50">
+              <Target className="w-7 h-7 text-[#C4B5A5] mb-2" />
+              <h4 className="text-xs font-semibold text-[#382418]">Domain calibration pending</h4>
+              <p className="text-[11px] text-[#7A6658] max-w-xs mt-1">
                 Practice across all four categories to establish domain strength benchmarks.
               </p>
               <Link
                 href="/tests"
-                className="mt-3 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium transition inline-flex items-center gap-1 shadow-2xs"
+                className="mt-3 px-3.5 py-1.5 rounded-lg bg-[#382418] hover:bg-[#25170F] text-[#F2E8DA] text-xs font-semibold transition inline-flex items-center gap-1.5 shadow-2xs"
               >
                 <span>Calibrate domains</span>
-                <ArrowRight className="w-3 h-3" />
+                <ArrowRight className="w-3 h-3 text-[#8EC5FF]" />
               </Link>
             </div>
           )}
@@ -308,24 +316,24 @@ export default function DashboardPage() {
       </div>
 
       {/* Modules Quick Access */}
-      <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-2xs">
-        <h3 className="text-xs font-semibold text-slate-900 mb-3">
+      <div className="bg-[#FFFFFF] rounded-2xl border border-[#382418]/10 p-5 sm:p-6 shadow-2xs">
+        <h3 className="text-xs font-bold text-[#382418] mb-3">
           Placement Modules
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <Link
             href="/copilot"
-            className="group p-3.5 rounded-lg border border-slate-200/80 hover:border-slate-300 hover:bg-slate-50/70 transition-colors flex items-start gap-3"
+            className="group p-3.5 rounded-xl border border-[#382418]/10 hover:border-[#382418]/30 hover:bg-[#FAF6F0]/70 transition-all flex items-start gap-3"
           >
-            <div className="w-8 h-8 rounded-md bg-slate-100 flex items-center justify-center text-slate-700 shrink-0 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
+            <div className="w-8 h-8 rounded-lg bg-[#F2E8DA] flex items-center justify-center text-[#382418] shrink-0 group-hover:bg-[#8EC5FF]/30 group-hover:text-[#1E3A5F] transition-colors">
               <Code2 className="w-4 h-4" />
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-semibold text-slate-900 group-hover:text-indigo-600 transition-colors flex items-center justify-between">
+              <p className="text-xs font-bold text-[#382418] group-hover:text-[#1E3A5F] transition-colors flex items-center justify-between">
                 <span>Prep Copilot</span>
-                <ChevronRight className="w-3.5 h-3.5 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <ChevronRight className="w-3.5 h-3.5 text-[#7A6658] opacity-0 group-hover:opacity-100 transition-opacity" />
               </p>
-              <p className="text-[11px] text-slate-500 mt-0.5 truncate">
+              <p className="text-[11px] text-[#7A6658] mt-0.5 truncate">
                 DSA doubts &amp; code runner
               </p>
             </div>
@@ -333,17 +341,17 @@ export default function DashboardPage() {
 
           <Link
             href="/interview"
-            className="group p-3.5 rounded-lg border border-slate-200/80 hover:border-slate-300 hover:bg-slate-50/70 transition-colors flex items-start gap-3"
+            className="group p-3.5 rounded-xl border border-[#382418]/10 hover:border-[#382418]/30 hover:bg-[#FAF6F0]/70 transition-all flex items-start gap-3"
           >
-            <div className="w-8 h-8 rounded-md bg-slate-100 flex items-center justify-center text-slate-700 shrink-0 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
+            <div className="w-8 h-8 rounded-lg bg-[#F2E8DA] flex items-center justify-center text-[#382418] shrink-0 group-hover:bg-[#8EC5FF]/30 group-hover:text-[#1E3A5F] transition-colors">
               <MessageSquare className="w-4 h-4" />
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-semibold text-slate-900 group-hover:text-indigo-600 transition-colors flex items-center justify-between">
+              <p className="text-xs font-bold text-[#382418] group-hover:text-[#1E3A5F] transition-colors flex items-center justify-between">
                 <span>Mock Interview</span>
-                <ChevronRight className="w-3.5 h-3.5 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <ChevronRight className="w-3.5 h-3.5 text-[#7A6658] opacity-0 group-hover:opacity-100 transition-opacity" />
               </p>
-              <p className="text-[11px] text-slate-500 mt-0.5 truncate">
+              <p className="text-[11px] text-[#7A6658] mt-0.5 truncate">
                 STAR evaluation rubric
               </p>
             </div>
@@ -351,17 +359,17 @@ export default function DashboardPage() {
 
           <Link
             href="/tests"
-            className="group p-3.5 rounded-lg border border-slate-200/80 hover:border-slate-300 hover:bg-slate-50/70 transition-colors flex items-start gap-3"
+            className="group p-3.5 rounded-xl border border-[#382418]/10 hover:border-[#382418]/30 hover:bg-[#FAF6F0]/70 transition-all flex items-start gap-3"
           >
-            <div className="w-8 h-8 rounded-md bg-slate-100 flex items-center justify-center text-slate-700 shrink-0 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
+            <div className="w-8 h-8 rounded-lg bg-[#F2E8DA] flex items-center justify-center text-[#382418] shrink-0 group-hover:bg-[#8EC5FF]/30 group-hover:text-[#1E3A5F] transition-colors">
               <ClipboardCheck className="w-4 h-4" />
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-semibold text-slate-900 group-hover:text-indigo-600 transition-colors flex items-center justify-between">
+              <p className="text-xs font-bold text-[#382418] group-hover:text-[#1E3A5F] transition-colors flex items-center justify-between">
                 <span>Aptitude Tests</span>
-                <ChevronRight className="w-3.5 h-3.5 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <ChevronRight className="w-3.5 h-3.5 text-[#7A6658] opacity-0 group-hover:opacity-100 transition-opacity" />
               </p>
-              <p className="text-[11px] text-slate-500 mt-0.5 truncate">
+              <p className="text-[11px] text-[#7A6658] mt-0.5 truncate">
                 Timed 3-tier assessments
               </p>
             </div>
@@ -369,17 +377,17 @@ export default function DashboardPage() {
 
           <Link
             href="/resume"
-            className="group p-3.5 rounded-lg border border-slate-200/80 hover:border-slate-300 hover:bg-slate-50/70 transition-colors flex items-start gap-3"
+            className="group p-3.5 rounded-xl border border-[#382418]/10 hover:border-[#382418]/30 hover:bg-[#FAF6F0]/70 transition-all flex items-start gap-3"
           >
-            <div className="w-8 h-8 rounded-md bg-slate-100 flex items-center justify-center text-slate-700 shrink-0 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
+            <div className="w-8 h-8 rounded-lg bg-[#F2E8DA] flex items-center justify-center text-[#382418] shrink-0 group-hover:bg-[#8EC5FF]/30 group-hover:text-[#1E3A5F] transition-colors">
               <FileText className="w-4 h-4" />
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-semibold text-slate-900 group-hover:text-indigo-600 transition-colors flex items-center justify-between">
+              <p className="text-xs font-bold text-[#382418] group-hover:text-[#1E3A5F] transition-colors flex items-center justify-between">
                 <span>Resume Intelligence</span>
-                <ChevronRight className="w-3.5 h-3.5 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <ChevronRight className="w-3.5 h-3.5 text-[#7A6658] opacity-0 group-hover:opacity-100 transition-opacity" />
               </p>
-              <p className="text-[11px] text-slate-500 mt-0.5 truncate">
+              <p className="text-[11px] text-[#7A6658] mt-0.5 truncate">
                 ATS scoring &amp; JD match
               </p>
             </div>
