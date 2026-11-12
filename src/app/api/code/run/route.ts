@@ -5,6 +5,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { callCloudflareAI } from "@/lib/gemini";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -28,19 +29,6 @@ async function simulateCodeExecution(
 ): Promise<{ success: boolean; output: string; error?: string; executionTimeMs: number }> {
   const startTime = Date.now();
   try {
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      return {
-        success: false,
-        output: "",
-        error: `Compiler for ${language} is not installed locally and GEMINI_API_KEY is not configured.`,
-        executionTimeMs: Date.now() - startTime,
-      };
-    }
-
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-
     const prompt = `You are a real-time, deterministic compilation and terminal execution engine for ${language}.
 Execute the following ${language} program with any standard input provided.
 Evaluate the exact stdout of the program as a real compiler/runtime would output.
@@ -58,24 +46,64 @@ ${input ? input : "(no input provided)"}
 Code to execute:
 ${code}`;
 
-    const result = await model.generateContent(prompt);
-    let text = result.response.text().trim();
+    // 1. Try Cloudflare Workers AI (Fast sub-second inference)
+    try {
+      const cfResponse = await callCloudflareAI(
+        prompt,
+        "You are a raw terminal stdout emulator. Output only program terminal stdout without backticks."
+      );
+      if (cfResponse && cfResponse.trim().length > 0) {
+        let text = cfResponse.trim();
+        if (text.startsWith("```")) {
+          text = text.replace(/^```[a-zA-Z]*\n?/, "").replace(/\n?```$/, "").trim();
+        }
+        const isCompilationError =
+          text.toLowerCase().includes("error:") ||
+          text.toLowerCase().includes("compilation error") ||
+          text.toLowerCase().includes("syntaxerror") ||
+          text.toLowerCase().includes("fatal error");
 
-    // Clean up stray markdown backticks if any
-    if (text.startsWith("```")) {
-      text = text.replace(/^```[a-zA-Z]*\n?/, "").replace(/\n?```$/, "").trim();
+        return {
+          success: !isCompilationError,
+          output: text,
+          error: isCompilationError ? text : undefined,
+          executionTimeMs: Date.now() - startTime,
+        };
+      }
+    } catch (cfErr) {
+      console.warn("Cloudflare sandbox simulation fallback:", cfErr);
     }
 
-    const isCompilationError =
-      text.toLowerCase().includes("error:") ||
-      text.toLowerCase().includes("compilation error") ||
-      text.toLowerCase().includes("syntaxerror") ||
-      text.toLowerCase().includes("fatal error");
+    // 2. Try Gemini Flash if configured
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (apiKey && apiKey.startsWith("AIzaSy")) {
+      const genAI = new GoogleGenerativeAI(apiKey);
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+      const result = await model.generateContent(prompt);
+      let text = result.response.text().trim();
+
+      if (text.startsWith("```")) {
+        text = text.replace(/^```[a-zA-Z]*\n?/, "").replace(/\n?```$/, "").trim();
+      }
+
+      const isCompilationError =
+        text.toLowerCase().includes("error:") ||
+        text.toLowerCase().includes("compilation error") ||
+        text.toLowerCase().includes("syntaxerror") ||
+        text.toLowerCase().includes("fatal error");
+
+      return {
+        success: !isCompilationError,
+        output: text,
+        error: isCompilationError ? text : undefined,
+        executionTimeMs: Date.now() - startTime,
+      };
+    }
 
     return {
-      success: !isCompilationError,
-      output: text,
-      error: isCompilationError ? text : undefined,
+      success: false,
+      output: "",
+      error: `Compiler for ${language} is not installed locally and cloud execution engines were unreachable.`,
       executionTimeMs: Date.now() - startTime,
     };
   } catch (err: unknown) {
