@@ -23,14 +23,28 @@ Tone and Engineering Rigor:
        - Chain-of-Thought (CoT): Guiding the model through intermediate deductive steps ("Let's think step by step").
      * State of the art coding assistants: GitHub Copilot, Cursor, Claude Code, Continue.dev. (Kite is discontinued since 2022; do not cite it).
      * Never hallucinate non-existent book titles or authors.
+   - In Computer Networks (Data Link Layer, Framing & Protocols):
+     * Bit Stuffing (Bit-oriented framing, e.g., HDLC / PPP):
+       - Uses delimiter flag sequence 01111110 (six consecutive 1s).
+       - Transmitter Rule: After detecting five consecutive 1s (11111) in user data, the sender automatically inserts a 0 bit (111110) so data never mimics the flag.
+       - Receiver Rule: When the receiver sees five consecutive 1s, if the 6th bit is 0, it removes (destuffs) it; if the 6th bit is 1 and 7th is 0, it's the flag 01111110.
+     * Byte Stuffing (Character-oriented framing):
+       - Uses flag bytes (e.g., FLAG = 0x7E or DLE).
+       - If FLAG occurs in data, an Escape byte (ESC) is stuffed before it (ESC FLAG).
+       - If ESC itself occurs in data, an extra ESC is stuffed (ESC ESC).
+       - The receiver removes the ESC and treats the next byte as raw data.
+     * Never invent fake concepts like "1-bit flags" or "11001100 replacement". Follow standard Tanenbaum / Kurose-Ross computer networking definitions.
+   - In Operating Systems & Systems Architecture:
+     * Threads share code, data, heap, and open file descriptors within a process, but each thread has its own Program Counter, CPU registers, and private stack.
+     * Deadlock requires all 4 Coffman conditions: Mutual Exclusion, Hold & Wait, No Preemption, Circular Wait.
 5. Format answers cleanly using standard Markdown headings, bullet points, and bold text.
 6. Proactive Follow-up Suggestions (like Gemini & ChatGPT):
-   At the very end of your response, ALWAYS provide 3 short, highly relevant follow-up questions or next steps that a student would ask next (e.g. asking for complexity, optimized implementation, edge cases, or interview follow-up).
-   Format them strictly at the end enclosed in tags:
+   At the very end of your response, ALWAYS provide 3 short, punchy, contextual follow-up questions that a student would ask next (maximum 10 words each).
+   Format them strictly at the end:
    <<<SUGGESTIONS>>>
-   - Follow-up suggestion 1
-   - Follow-up suggestion 2
-   - Follow-up suggestion 3
+   - <Question 1>
+   - <Question 2>
+   - <Question 3>
    <<<END_SUGGESTIONS>>>`;
 
 function generateTitleFromPrompt(prompt: string): string {

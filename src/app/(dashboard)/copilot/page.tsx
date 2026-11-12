@@ -30,6 +30,7 @@ import {
   Code2,
   Terminal,
   Cpu,
+  ArrowRight,
 } from "lucide-react";
 
 interface Message {
@@ -44,21 +45,67 @@ interface ParsedMessage {
 }
 
 function parseMessageContent(rawContent: string): ParsedMessage {
-  const suggestionRegex = /<<<SUGGESTIONS>>>([\s\S]*?)<<<END_SUGGESTIONS>>>/;
-  const match = suggestionRegex.exec(rawContent);
+  // Support <<<SUGGESTIONS>>>, **Suggested Follow-ups**, or ### Suggested Follow-ups
+  const tagRegex = /(?:<<<SUGGESTIONS>>>|\*\*Suggested Follow-ups:?\*\*|### Suggested Follow-ups)/i;
+  const match = tagRegex.exec(rawContent);
 
   if (!match) {
     return { text: rawContent, suggestions: [] };
   }
 
-  const cleanText = rawContent.replace(suggestionRegex, "").trim();
-  const suggestionsBlock = match[1];
+  const cleanText = rawContent.substring(0, match.index).trim();
+  let suggestionsBlock = rawContent.substring(match.index + match[0].length);
+
+  const endTag = "<<<END_SUGGESTIONS>>>";
+  const endIdx = suggestionsBlock.indexOf(endTag);
+  if (endIdx !== -1) {
+    suggestionsBlock = suggestionsBlock.substring(0, endIdx);
+  }
+
   const suggestions = suggestionsBlock
     .split("\n")
-    .map((line) => line.replace(/^[-*•\d.]\s*/, "").trim())
-    .filter((line) => line.length > 0 && !line.startsWith("<"));
+    .map((line) => line.replace(/^[-*•\d.)\]\s]+/, "").trim())
+    .filter((line) => line.length > 5 && !line.startsWith("<") && !line.startsWith("#"))
+    .slice(0, 3);
 
   return { text: cleanText, suggestions };
+}
+
+function getFallbackSuggestions(content: string): string[] {
+  const lower = content.toLowerCase();
+  if (lower.includes("stuffing") || lower.includes("data link") || lower.includes("framing") || lower.includes("network") || lower.includes("hdlc") || lower.includes("layer")) {
+    return [
+      "Explain the exact HDLC 01111110 bit stuffing rule",
+      "Show Byte Stuffing with ESC / DLE frame format",
+      "What is the difference between Bit stuffing and Byte stuffing?",
+    ];
+  }
+  if (lower.includes("tree") || lower.includes("graph") || lower.includes("array") || lower.includes("dsa") || lower.includes("sort") || lower.includes("complexity") || lower.includes("algorithm")) {
+    return [
+      "What is the time and space complexity breakdown?",
+      "Can we optimize this further using two pointers or hash map?",
+      "What are the critical edge cases for this approach?",
+    ];
+  }
+  if (lower.includes("prompt") || lower.includes("zero-shot") || lower.includes("few-shot") || lower.includes("ai") || lower.includes("llm")) {
+    return [
+      "Show a concrete Few-Shot prompt with 3 exemplars",
+      "Explain Chain-of-Thought (CoT) prompting with step-by-step reasoning",
+      "What are common prompt injection vulnerabilities and defenses?",
+    ];
+  }
+  if (lower.includes("index") || lower.includes("sql") || lower.includes("database") || lower.includes("postgres") || lower.includes("system design") || lower.includes("b-tree")) {
+    return [
+      "Compare B-Tree vs Hash index in PostgreSQL with trade-offs",
+      "Explain ACID transaction isolation levels with examples",
+      "How to scale this architecture with read replicas and caching?",
+    ];
+  }
+  return [
+    "Can you provide a concrete interview-level example?",
+    "What would Google or Amazon interviewers ask next on this?",
+    "How does this behave under edge cases or high load?",
+  ];
 }
 
 const QUICK_START_CARDS = [
@@ -815,26 +862,38 @@ export default function CopilotPage() {
                           )}
                         </div>
 
-                        {/* Contextual Suggestions Chips Under Assistant Response */}
-                        {parsed && parsed.suggestions.length > 0 && (
-                          <div className="mt-3.5 pt-2.5 border-t border-slate-200/70">
-                            <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1">
-                              <Sparkles className="w-3 h-3 text-indigo-500" />
-                              <span>Explore Next</span>
-                            </p>
-                            <div className="flex flex-wrap gap-1.5">
-                              {parsed.suggestions.map((sug, sIdx) => (
-                                <button
-                                  key={sIdx}
-                                  onClick={() => handleSend(sug)}
-                                  className="text-[11px] bg-white hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-300 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-200/80 transition-all text-left shadow-2xs cursor-pointer flex items-center gap-1.5 group/chip"
-                                >
-                                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 group-hover/chip:scale-125 transition-transform" />
-                                  <span>{sug}</span>
-                                </button>
-                              ))}
-                            </div>
-                          </div>
+                        {/* Contextual Dynamic Suggestions Chips (like Gemini / ChatGPT) */}
+                        {msg.role === "assistant" && idx > 0 && (
+                          (() => {
+                            const activeSuggestions = parsed && parsed.suggestions.length > 0
+                              ? parsed.suggestions
+                              : getFallbackSuggestions(parsed?.text || msg.content);
+
+                            if (activeSuggestions.length === 0) return null;
+
+                            return (
+                              <div className="mt-3.5 pt-2.5 border-t border-slate-200/70">
+                                <p className="text-[10px] font-semibold text-indigo-600 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                                  <Sparkles className="w-3 h-3 text-indigo-500" />
+                                  <span>Suggested Next Questions (Click to Ask)</span>
+                                </p>
+                                <div className="flex flex-col sm:flex-row flex-wrap gap-2">
+                                  {activeSuggestions.map((sug, sIdx) => (
+                                    <button
+                                      key={sIdx}
+                                      onClick={() => handleSend(sug)}
+                                      disabled={loading}
+                                      className="text-left text-[11px] sm:text-xs bg-white hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-300 text-slate-700 px-3 py-1.5 rounded-full border border-slate-200/90 transition-all shadow-2xs hover:shadow-xs cursor-pointer flex items-center justify-between gap-2.5 group/chip disabled:opacity-50"
+                                      title={`Ask: "${sug}"`}
+                                    >
+                                      <span className="font-medium">{sug}</span>
+                                      <ArrowRight className="w-3 h-3 text-slate-400 group-hover/chip:text-indigo-600 group-hover/chip:translate-x-0.5 transition-all shrink-0" />
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            );
+                          })()
                         )}
                       </div>
 
