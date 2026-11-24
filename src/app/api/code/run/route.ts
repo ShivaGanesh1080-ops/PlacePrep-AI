@@ -119,10 +119,8 @@ ${code}`;
 
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id && !session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    // Optional session check: allow authenticated students and guest sandbox runs
+    const session = await getServerSession(authOptions).catch(() => null);
 
     const { code, language = "python", input = "" } = await req.json();
 
@@ -131,6 +129,24 @@ export async function POST(req: Request) {
     }
 
     const lang = (language || "python").toLowerCase().trim();
+
+    // Guard: Desktop GUI libraries in Python require X11 / Wayland display
+    if (
+      (lang.includes("python") || lang.includes("py")) &&
+      (code.includes("import turtle") ||
+        code.includes("from turtle") ||
+        code.includes("import tkinter") ||
+        code.includes("from tkinter") ||
+        code.includes("import pygame"))
+    ) {
+      return NextResponse.json({
+        success: false,
+        output: "",
+        error:
+          "⚠️ Desktop GUI libraries ('turtle', 'tkinter', 'pygame') require a local graphical window manager ($DISPLAY) and cannot open a window inside a headless web terminal sandbox.\n\nTip: For placement exams and interview coding, write terminal-based console algorithms using standard loops and print('*') statements to output patterns.",
+        executionTimeMs: 1,
+      });
+    }
 
     // 1. HTML / Markup sandbox
     const isHtml =
@@ -366,6 +382,14 @@ export async function POST(req: Request) {
       let stdout = "";
       let stderr = "";
       let isTimedOut = false;
+      let isResolved = false;
+
+      const safeResolve = (res: NextResponse) => {
+        if (!isResolved) {
+          isResolved = true;
+          resolve(res);
+        }
+      };
 
       const cp = getChildProcess();
       const child = cp.spawn(command, [tempFilePath], {
@@ -399,7 +423,20 @@ export async function POST(req: Request) {
         }
       });
 
+      child.on("error", async (spawnErr: Error) => {
+        clearTimeout(timer);
+        try {
+          await fs.unlink(tempFilePath);
+        } catch {}
+
+        console.warn(`Execution binary (${command}) failed to spawn:`, spawnErr.message);
+        // Fallback to AI compiler simulation if python/node is missing from host
+        const sim = await simulateCodeExecution(code, lang, input);
+        safeResolve(NextResponse.json(sim));
+      });
+
       child.on("close", async (exitCode: number | null) => {
+        if (isResolved) return;
         clearTimeout(timer);
         const executionTimeMs = Date.now() - startTime;
 
@@ -408,7 +445,7 @@ export async function POST(req: Request) {
         } catch {}
 
         if (isTimedOut) {
-          resolve(
+          safeResolve(
             NextResponse.json({
               success: false,
               output: stdout,
@@ -419,26 +456,24 @@ export async function POST(req: Request) {
           return;
         }
 
-        resolve(
+        const isSuccess = exitCode === 0;
+        const trimmedErr = stderr ? stderr.trim() : undefined;
+        const fallbackErr =
+          !isSuccess && !stdout.trim() && !trimmedErr
+            ? exitCode !== null
+              ? `Process exited with error code ${exitCode}.`
+              : "Process failed or was terminated."
+            : trimmedErr;
+
+        safeResolve(
           NextResponse.json({
-            success: exitCode === 0,
+            success: isSuccess,
             output: stdout,
-            error: stderr ? stderr.trim() : undefined,
+            error: fallbackErr,
             exitCode,
             executionTimeMs,
           })
         );
-      });
-
-      child.on("error", async () => {
-        clearTimeout(timer);
-        try {
-          await fs.unlink(tempFilePath);
-        } catch {}
-
-        // Fallback to Gemini simulation if python/node is missing from host
-        const sim = await simulateCodeExecution(code, lang, input);
-        resolve(NextResponse.json(sim));
       });
     });
   } catch (err: unknown) {

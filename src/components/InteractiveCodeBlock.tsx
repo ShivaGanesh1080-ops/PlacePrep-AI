@@ -396,8 +396,10 @@ export default function InteractiveCodeBlock({
           )}
 
           {!result.output && !result.error && (
-            <div className="text-slate-500 italic">
-              [Program completed with no console output]
+            <div className={`italic ${result.success ? "text-slate-500" : "text-red-400"}`}>
+              {result.success
+                ? "[Program completed with no console output]"
+                : "⚠️ Process encountered an execution error with no terminal output."}
             </div>
           )}
         </div>

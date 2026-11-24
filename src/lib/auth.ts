@@ -17,7 +17,7 @@ if (
   if (process.env.RENDER_EXTERNAL_URL) {
     process.env.NEXTAUTH_URL = process.env.RENDER_EXTERNAL_URL;
   } else {
-    process.env.NEXTAUTH_URL = "https://placeprep-ai-r9xo.onrender.com";
+    process.env.NEXTAUTH_URL = "https://placeprep-ai-609060273806.asia-south1.run.app";
   }
 }
 
