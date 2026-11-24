@@ -53,6 +53,13 @@ export default function InteractiveCodeBlock({
       code.includes("addEventListener") ||
       code.includes("alert("));
 
+  const isText =
+    normalizedLang === "text" ||
+    normalizedLang === "txt" ||
+    normalizedLang === "output" ||
+    normalizedLang === "console" ||
+    normalizedLang === "raw";
+
   const isWebCode = isHtml || isCss || isBrowserJs;
 
   const [showLivePreview, setShowLivePreview] = useState(isHtml);
@@ -163,7 +170,9 @@ export default function InteractiveCodeBlock({
         <div className="flex items-center gap-2">
           <span
             className={`w-2.5 h-2.5 rounded-full inline-block ${
-              isHtml
+              isText
+                ? "bg-slate-400"
+                : isHtml
                 ? "bg-amber-400"
                 : isCss
                 ? "bg-blue-400"
@@ -173,7 +182,9 @@ export default function InteractiveCodeBlock({
             }`}
           />
           <span className="font-mono font-bold uppercase tracking-wider text-slate-300 text-[11px]">
-            {isHtml
+            {isText
+              ? "Console Output"
+              : isHtml
               ? "HTML / Web"
               : isCss
               ? "CSS Stylesheet"
@@ -182,7 +193,9 @@ export default function InteractiveCodeBlock({
               : normalizedLang || "code"}
           </span>
           <span className="text-[10px] text-slate-400 font-medium px-2 py-0.5 rounded bg-slate-800">
-            {isHtml
+            {isText
+              ? "Expected Output"
+              : isHtml
               ? "Live Web Sandbox"
               : isCss
               ? "Styling Rules"
@@ -193,8 +206,8 @@ export default function InteractiveCodeBlock({
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Stdin Toggle (only for Python/Node) */}
-          {!isWebCode && (
+          {/* Stdin Toggle (only for Python/Node executable code) */}
+          {!isWebCode && !isText && (
             <button
               onClick={() => setShowStdin(!showStdin)}
               className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition ${
@@ -208,19 +221,21 @@ export default function InteractiveCodeBlock({
             </button>
           )}
 
-          {/* Edit Toggle */}
-          <button
-            onClick={() => setIsEditing(!isEditing)}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition flex items-center gap-1 ${
-              isEditing
-                ? "bg-amber-500/30 text-amber-300 border border-amber-500/40"
-                : "text-slate-400 hover:text-slate-200 hover:bg-slate-800"
-            }`}
-            title="Edit code before running"
-          >
-            <Edit3 className="w-3 h-3" />
-            {isEditing ? "Editing" : "Edit"}
-          </button>
+          {/* Edit Toggle (only for executable code) */}
+          {!isText && (
+            <button
+              onClick={() => setIsEditing(!isEditing)}
+              className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition flex items-center gap-1 ${
+                isEditing
+                  ? "bg-amber-500/30 text-amber-300 border border-amber-500/40"
+                  : "text-slate-400 hover:text-slate-200 hover:bg-slate-800"
+              }`}
+              title="Edit code before running"
+            >
+              <Edit3 className="w-3 h-3" />
+              {isEditing ? "Editing" : "Edit"}
+            </button>
+          )}
 
           {/* Copy Button */}
           <button
@@ -235,47 +250,49 @@ export default function InteractiveCodeBlock({
             )}
           </button>
 
-          {/* Action Button: Run vs Preview */}
-          <button
-            onClick={handleRun}
-            disabled={running}
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold text-xs shadow-md transition disabled:opacity-50 text-white ${
-              isHtml
-                ? "bg-indigo-600 hover:bg-indigo-500"
-                : isCss
-                ? "bg-blue-600 hover:bg-blue-500"
-                : isBrowserJs
-                ? "bg-amber-600 hover:bg-amber-500"
-                : "bg-emerald-600 hover:bg-emerald-500"
-            }`}
-          >
-            {running ? (
-              <>
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                <span>Running...</span>
-              </>
-            ) : isHtml ? (
-              <>
-                <Eye className="w-3.5 h-3.5" />
-                <span>Preview HTML</span>
-              </>
-            ) : isCss ? (
-              <>
-                <Palette className="w-3.5 h-3.5" />
-                <span>Stylesheet Info</span>
-              </>
-            ) : isBrowserJs ? (
-              <>
-                <FileCode className="w-3.5 h-3.5" />
-                <span>DOM Script Info</span>
-              </>
-            ) : (
-              <>
-                <Play className="w-3.5 h-3.5 fill-current" />
-                <span>Run Code</span>
-              </>
-            )}
-          </button>
+          {/* Action Button: Run vs Preview (hidden for raw text/output) */}
+          {!isText && (
+            <button
+              onClick={handleRun}
+              disabled={running}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold text-xs shadow-md transition disabled:opacity-50 text-white ${
+                isHtml
+                  ? "bg-indigo-600 hover:bg-indigo-500"
+                  : isCss
+                  ? "bg-blue-600 hover:bg-blue-500"
+                  : isBrowserJs
+                  ? "bg-amber-600 hover:bg-amber-500"
+                  : "bg-emerald-600 hover:bg-emerald-500"
+              }`}
+            >
+              {running ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Running...</span>
+                </>
+              ) : isHtml ? (
+                <>
+                  <Eye className="w-3.5 h-3.5" />
+                  <span>Preview HTML</span>
+                </>
+              ) : isCss ? (
+                <>
+                  <Palette className="w-3.5 h-3.5" />
+                  <span>Stylesheet Info</span>
+                </>
+              ) : isBrowserJs ? (
+                <>
+                  <FileCode className="w-3.5 h-3.5" />
+                  <span>DOM Script Info</span>
+                </>
+              ) : (
+                <>
+                  <Play className="w-3.5 h-3.5 fill-white" />
+                  <span>Run Code</span>
+                </>
+              )}
+            </button>
+          )}
         </div>
       </div>
 

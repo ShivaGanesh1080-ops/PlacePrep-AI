@@ -508,8 +508,17 @@ export default function CopilotPage() {
         );
       }
 
-      const lang = match[1] || "python";
+      let lang = (match[1] || "").toLowerCase().trim();
       const codeSnippet = match[2];
+
+      if (!lang) {
+        // Detect if snippet is actual code vs terminal text / ASCII output
+        const hasCodeKeywords =
+          /\b(def|class|import|return|print|function|const|let|var|for|while|if|else|public|void|int|include)\b/.test(
+            codeSnippet
+          );
+        lang = hasCodeKeywords ? "python" : "text";
+      }
 
       parts.push(
         <InteractiveCodeBlock
