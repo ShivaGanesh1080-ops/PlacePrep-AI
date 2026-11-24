@@ -1,0 +1,8 @@
+node_modules
+.next
+.git
+.env*.local
+*.log
+PlacePrep_AI_Presentation.pptx
+PlacePrep_AI_Project_Report.docx
+placeprep_uberdesigner_preview.html
