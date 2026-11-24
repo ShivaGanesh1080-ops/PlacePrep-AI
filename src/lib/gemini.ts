@@ -40,90 +40,115 @@ function extractCloudflareResponse(data: any): string | null {
 }
 
 /**
- * Call Cloudflare Workers AI (Free tier: 10,000 neurons/day)
- * Model: @cf/meta/llama-3.1-8b-instruct
+ * Call Cloudflare Workers AI with intelligent model cascade
+ * Prioritizes elite code models (Qwen 2.5 Coder 32B / Llama 3.3 70B) over 8B
  */
 export async function callCloudflareAI(prompt: string, systemPrompt?: string): Promise<string | null> {
   if (!CLOUDFLARE_ACCOUNT_ID || !CLOUDFLARE_API_TOKEN) return null;
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 15000);
 
-    const res = await fetch(
-      `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/meta/llama-3.1-8b-instruct`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${CLOUDFLARE_API_TOKEN}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          messages: [
-            ...(systemPrompt ? [{ role: "system", content: systemPrompt }] : []),
-            { role: "user", content: prompt },
-          ],
-          max_tokens: 1000,
-        }),
-        signal: controller.signal,
+  const models = [
+    "@cf/qwen/qwen2.5-coder-32b-instruct",
+    "@cf/meta/llama-3.3-70b-instruct",
+    "@cf/meta/llama-3.1-8b-instruct",
+  ];
+
+  for (const model of models) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000);
+
+      const res = await fetch(
+        `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/${model}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${CLOUDFLARE_API_TOKEN}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            messages: [
+              ...(systemPrompt ? [{ role: "system", content: systemPrompt }] : []),
+              { role: "user", content: prompt },
+            ],
+            max_tokens: 1200,
+          }),
+          signal: controller.signal,
+        }
+      );
+
+      clearTimeout(timeout);
+      if (res.ok) {
+        const data = await res.json();
+        const extracted = extractCloudflareResponse(data);
+        if (extracted && extracted.trim().length > 0) {
+          return extracted;
+        }
       }
-    );
-
-    clearTimeout(timeout);
-    if (res.ok) {
-      const data = await res.json();
-      return extractCloudflareResponse(data);
+    } catch (err) {
+      console.warn(`Cloudflare model ${model} failed, trying next:`, err);
     }
-  } catch (err) {
-    console.warn("Cloudflare Workers AI request failed:", err);
   }
   return null;
 }
 
 /**
  * Call Cloudflare Workers AI with multi-turn chat history
+ * Prioritizes high-parameter reasoning models for spatial and algorithmic rigor
  */
 async function callCloudflareChat(
   messages: Array<{ role: "user" | "assistant" | "system"; content: string; image?: string }>,
   systemPrompt?: string
 ): Promise<string | null> {
   if (!CLOUDFLARE_ACCOUNT_ID || !CLOUDFLARE_API_TOKEN) return null;
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 15000);
 
-    const formattedMessages = [
-      ...(systemPrompt ? [{ role: "system", content: systemPrompt }] : []),
-      ...messages.slice(-8).map((m) => ({
-        role: m.role === "assistant" ? "assistant" : "user",
-        content: m.image
-          ? `${m.content}\n[Candidate attached code/problem screenshot: "${m.content}"]`
-          : m.content,
-      })),
-    ];
+  const formattedMessages = [
+    ...(systemPrompt ? [{ role: "system", content: systemPrompt }] : []),
+    ...messages.slice(-8).map((m) => ({
+      role: m.role === "assistant" ? "assistant" : "user",
+      content: m.image
+        ? `${m.content}\n[Candidate attached code/problem screenshot: "${m.content}"]`
+        : m.content,
+    })),
+  ];
 
-    const res = await fetch(
-      `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/meta/llama-3.1-8b-instruct`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${CLOUDFLARE_API_TOKEN}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          messages: formattedMessages,
-          max_tokens: 1200,
-        }),
-        signal: controller.signal,
+  const models = [
+    "@cf/qwen/qwen2.5-coder-32b-instruct",
+    "@cf/meta/llama-3.3-70b-instruct",
+    "@cf/meta/llama-3.1-8b-instruct",
+  ];
+
+  for (const model of models) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 18000);
+
+      const res = await fetch(
+        `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/${model}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${CLOUDFLARE_API_TOKEN}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            messages: formattedMessages,
+            max_tokens: 1400,
+          }),
+          signal: controller.signal,
+        }
+      );
+
+      clearTimeout(timeout);
+      if (res.ok) {
+        const data = await res.json();
+        const extracted = extractCloudflareResponse(data);
+        if (extracted && extracted.trim().length > 0) {
+          return extracted;
+        }
       }
-    );
-
-    clearTimeout(timeout);
-    if (res.ok) {
-      const data = await res.json();
-      return extractCloudflareResponse(data);
+    } catch (err) {
+      console.warn(`Cloudflare chat model ${model} failed, trying next:`, err);
     }
-  } catch (err) {
-    console.warn("Cloudflare Workers AI chat failed:", err);
   }
   return null;
 }

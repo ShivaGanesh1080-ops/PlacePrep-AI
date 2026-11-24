@@ -73,6 +73,24 @@ function parseMessageContent(rawContent: string): ParsedMessage {
 
 function getFallbackSuggestions(content: string): string[] {
   const lower = content.toLowerCase();
+
+  // Pattern printing & Matrix coordinate shapes
+  if (
+    lower.includes("pattern") ||
+    lower.includes("shape") ||
+    lower.includes("triangle") ||
+    lower.includes("pyramid") ||
+    lower.includes("asterisk") ||
+    lower.includes("alphabet")
+  ) {
+    return [
+      "How to implement this using a 2D matrix (row, col) grid?",
+      "Can we make this pattern hollow instead of solid?",
+      "How would you generalize this for any input size n?",
+    ];
+  }
+
+  // Computer Networks
   if (lower.includes("stuffing") || lower.includes("data link") || lower.includes("framing") || lower.includes("network") || lower.includes("hdlc") || lower.includes("layer")) {
     return [
       "Explain the exact HDLC 01111110 bit stuffing rule",
@@ -80,7 +98,16 @@ function getFallbackSuggestions(content: string): string[] {
       "What is the difference between Bit stuffing and Byte stuffing?",
     ];
   }
-  if (lower.includes("tree") || lower.includes("graph") || lower.includes("array") || lower.includes("dsa") || lower.includes("sort") || lower.includes("complexity") || lower.includes("algorithm")) {
+
+  // DSA / Array / Hash Map / Two Pointers
+  if (
+    lower.includes("tree") ||
+    lower.includes("graph") ||
+    lower.includes("two sum") ||
+    lower.includes("binary search") ||
+    lower.includes("dynamic programming") ||
+    (lower.includes("array") && lower.includes("sort"))
+  ) {
     return [
       "What is the time and space complexity breakdown?",
       "Can we optimize this further using two pointers or hash map?",
