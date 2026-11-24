@@ -130,20 +130,23 @@ export async function POST(req: Request) {
 
     const lang = (language || "python").toLowerCase().trim();
 
-    // Guard: Desktop GUI libraries in Python require X11 / Wayland display
-    if (
+    // Guard: Desktop GUI / plotting window libraries in Python require X11 / Wayland display
+    const isDesktopGuiOrPlot =
       (lang.includes("python") || lang.includes("py")) &&
-      (code.includes("import turtle") ||
-        code.includes("from turtle") ||
-        code.includes("import tkinter") ||
-        code.includes("from tkinter") ||
-        code.includes("import pygame"))
-    ) {
+      (code.includes("turtle") ||
+        code.includes("tkinter") ||
+        code.includes("pygame") ||
+        code.includes("plt.show") ||
+        code.includes("matplotlib") ||
+        code.includes("seaborn") ||
+        code.includes("cv2.imshow"));
+
+    if (isDesktopGuiOrPlot) {
       return NextResponse.json({
         success: false,
         output: "",
         error:
-          "⚠️ Desktop GUI libraries ('turtle', 'tkinter', 'pygame') require a local graphical window manager ($DISPLAY) and cannot open a window inside a headless web terminal sandbox.\n\nTip: For placement exams and interview coding, write terminal-based console algorithms using standard loops and print('*') statements to output patterns.",
+          "⚠️ Desktop GUI & Plotting libraries ('matplotlib', 'plt.show()', 'turtle', 'tkinter', 'pygame', 'cv2') require a local graphical desktop window ($DISPLAY) and cannot pop up a graphical window inside a web terminal sandbox.\n\n💡 Tip for Placement & Interviews:\nFor pattern problems (like right-angled triangles, pyramids, numbers), write terminal console algorithms using loops and print('*') statements to output patterns directly to stdout.",
         executionTimeMs: 1,
       });
     }
