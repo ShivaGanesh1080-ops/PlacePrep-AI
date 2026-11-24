@@ -314,16 +314,43 @@ export async function chatWithOllama(
     if (cfRes) return cfRes;
   }
 
-  // 2. Try Groq if configured
+  // 3. Try Groq if configured
   if (GROQ_API_KEY) {
     const groqRes = await callGroq(lastUserMessage, systemPrompt);
     if (groqRes) return groqRes;
   }
 
-  // 3. Try Ollama (Local) with high timeout and parallel CPU threads
+  // 4. Try Google Gemini (Production Cloud Fallback)
+  if (GEMINI_API_KEY && GEMINI_API_KEY.length > 10) {
+    try {
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const history = messages.slice(0, -1).map((m) => ({
+        role: m.role === "assistant" ? ("model" as const) : ("user" as const),
+        parts: [{ text: m.content }],
+      }));
+
+      const chat = model.startChat({
+        history: systemPrompt
+          ? [
+              { role: "user", parts: [{ text: systemPrompt }] },
+              { role: "model", parts: [{ text: "Understood. I will act strictly according to these instructions." }] },
+              ...history,
+            ]
+          : history,
+      });
+
+      const result = await chat.sendMessage(lastUserMessage);
+      const text = result.response.text();
+      if (text && text.trim()) return text.trim();
+    } catch (geminiErr) {
+      console.warn("Gemini chat fallback error:", geminiErr);
+    }
+  }
+
+  // 5. Try Ollama (Local development only)
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 75000);
+    const timeout = setTimeout(() => controller.abort(), 10000);
 
     const formattedMessages = [
       ...(systemPrompt ? [{ role: "system", content: systemPrompt }] : []),
@@ -377,7 +404,7 @@ export async function generateAIResponse(prompt: string, systemPrompt?: string):
   if (ollamaRes) return ollamaRes;
 
   // 4. Gemini
-  if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.startsWith("AIzaSy")) {
+  if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim().length > 10) {
     try {
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
       const result = await model.generateContent(systemPrompt ? `${systemPrompt}\n\n${prompt}` : prompt);
@@ -464,6 +491,6 @@ function getIntelligentAnswer(prompt: string): string {
     });
   }
 
-  // Generic honest fallback if all LLM engines are unreachable
-  return "I am currently unable to reach the local Ollama LLM (`gemma2:2b`). Please ensure `ollama serve` is running in your terminal so I can generate real-time answers for you.";
+  // Generic fallback if all cloud LLM engines are unreachable
+  return "I am currently unable to reach the configured AI inference engines (Cloudflare Workers AI / Gemini). Please ensure CLOUDFLARE_ACCOUNT_ID & CLOUDFLARE_API_TOKEN or GEMINI_API_KEY are configured in your Cloud Run Environment Variables.";
 }
