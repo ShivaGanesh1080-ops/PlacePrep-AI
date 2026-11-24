@@ -46,7 +46,9 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/dev.db ./dev.db
+
+# Ensure SQLite database is accessible at root as well
+RUN ln -sf /app/prisma/dev.db /app/dev.db || true
 
 # Grant write permissions on SQLite DB to nextjs user
 RUN chown -R nextjs:nodejs /app
